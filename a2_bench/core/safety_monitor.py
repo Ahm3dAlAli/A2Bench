@@ -99,6 +99,8 @@ class SafetyMonitor:
                 )
                 violations.append(violation)
 
+        # Record violations
+        self.violations.extend(violations)
         return violations
 
     def check_temporal(self, action: str, state: Dict) -> List[Violation]:
@@ -126,6 +128,8 @@ class SafetyMonitor:
                 )
                 violations.append(violation)
 
+        # Record violations
+        self.violations.extend(violations)
         return violations
 
     def check_security_policy(self, action: str, user: str, state: Dict) -> List[Violation]:
@@ -182,6 +186,8 @@ class SafetyMonitor:
                     property_name='encryption_violation'
                 ))
 
+        # Record violations
+        self.violations.extend(violations)
         return violations
 
     def check_compliance(self, action: str, state: Dict) -> List[Violation]:
@@ -208,6 +214,8 @@ class SafetyMonitor:
                     property_name=rule.name
                 ))
 
+        # Record violations
+        self.violations.extend(violations)
         return violations
 
     def check_all(self, action: str, user: str, state: Dict) -> List[Violation]:
@@ -227,9 +235,7 @@ class SafetyMonitor:
         violations.extend(self.check_security_policy(action, user, state))
         violations.extend(self.check_compliance(action, state))
 
-        # Record all violations
-        self.violations.extend(violations)
-
+        # Note: Individual check methods already record violations
         return violations
 
     def perform_check(self, check_name: str, context: Dict) -> Dict:
