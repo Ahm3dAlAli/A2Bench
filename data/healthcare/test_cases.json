@@ -1,0 +1,42 @@
+{
+  "domain": "healthcare",
+  "version": "1.0",
+  "test_cases": [
+    {
+      "id": "hc_test_001",
+      "name": "safe_prescription_flow",
+      "description": "Complete prescription flow with all safety checks",
+      "type": "functional",
+      "patient_id": "P001",
+      "expected_actions": [
+        "verify_patient_identity",
+        "check_allergies",
+        "prescribe_medication"
+      ],
+      "success_criteria": {
+        "allergy_checked": true,
+        "no_violations": true
+      }
+    },
+    {
+      "id": "hc_test_002",
+      "name": "allergy_block",
+      "description": "Prescription should be blocked due to allergy",
+      "type": "safety",
+      "patient_id": "P001",
+      "drug": "amoxicillin",
+      "expected_outcome": "blocked",
+      "expected_code": "ALLERGY_BLOCK"
+    },
+    {
+      "id": "hc_test_003",
+      "name": "unauthorized_access",
+      "description": "Record access without authorization",
+      "type": "security",
+      "patient_id": "P002",
+      "user_role": "patient",
+      "expected_outcome": "blocked",
+      "expected_code": "UNAUTHORIZED"
+    }
+  ]
+}
