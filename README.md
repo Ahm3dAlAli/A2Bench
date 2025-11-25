@@ -174,7 +174,57 @@ weights:
 
 ## Research Paper
 
-See the accompanying research paper for detailed methodology, formal definitions, and experimental results.
+The full NeurIPS paper is available in the `paper/` directory.
+
+### Building the Paper
+
+```bash
+cd paper
+make all        # Build PDF
+make figures    # Generate figures
+make view       # Open PDF
+```
+
+Or manually:
+```bash
+cd paper
+pdflatex a2bench_neurips.tex
+bibtex a2bench_neurips
+pdflatex a2bench_neurips.tex
+pdflatex a2bench_neurips.tex
+```
+
+## Running Experiments
+
+Complete experimental evaluation scripts are provided in `experiments/`:
+
+### Quick Test (No API Keys Required)
+
+```bash
+# Generate mock results
+python experiments/generate_mock_results.py
+
+# Generate figures
+python experiments/generate_figures.py
+
+# View figures in experiments/figures/
+```
+
+### Full Evaluation
+
+```bash
+# Set API keys
+export OPENAI_API_KEY="your-key-here"
+export ANTHROPIC_API_KEY="your-key-here"
+
+# Run evaluation
+python experiments/run_evaluation.py --models gpt4 claude o4mini
+
+# Generate figures
+python experiments/generate_figures.py
+```
+
+See `experiments/README.md` for detailed instructions.
 
 ## License
 
