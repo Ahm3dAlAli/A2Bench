@@ -74,14 +74,23 @@ Our experiments reveal that state-of-the-art models achieve overall A²-Scores o
 
 \paragraph{Agent Benchmarks} Recent work has developed benchmarks for evaluating AI agents on functional tasks. AgentBench \cite{liu2023agentbench} evaluates agents on code generation, knowledge acquisition, and operating system tasks. WebArena \cite{zhou2023webarena} tests agents on realistic web-based tasks. ToolBench \cite{qin2023toolbench} focuses on tool use capabilities. While these benchmarks measure task completion, they do not systematically evaluate safety, security, or adversarial robustness.
 
-\paragraph{AI Safety Evaluation} Prior work has examined specific safety aspects. TruthfulQA \cite{lin2022truthfulqa} evaluates truthfulness. MMLU \cite{hendrycks2021measuring} tests knowledge across domains. However, these focus on knowledge and reasoning rather than behavioral safety under adversarial conditions. ToxiGen \cite{hartvigsen2022toxigen} and RealToxicityPrompts \cite{gehman2020realtoxicityprompts} evaluate harmful content generation but not interactive agent behavior.
+\paragraph{AI Safety Evaluation} Prior work has examined specific safety aspects. TruthfulQA \cite{lin2022truthfulqa} evaluates truthfulness. MMLU \cite{hendrycks2021measuring} tests knowledge across domains. However, these focus on knowledge and reasoning rather than behavioral safety under adversarial conditions. ToxiGen \cite{hartvigsen2022toxigen} and RealToxicityPrompts \cite{gehman2020realtoxicityprompts} evaluate harmful content generation but not interactive agent behavior. Recent work on Constitutional AI \cite{bai2022constitutional} and RLHF \cite{ouyang2022training} improves safety through feedback, but evaluation remains limited. Weidinger et al.~\cite{weidinger2021ethical} identify ethical risks but lack quantitative benchmarks.
 
-\paragraph{Adversarial Evaluation} AdvGLUE \cite{wang2021adversarial} and other adversarial NLP benchmarks test model robustness. Prompt injection attacks have been studied \cite{perez2022ignore, liu2023jailbreaking}, but primarily for single-turn completions rather than multi-turn agent interactions with state. Our work systematically evaluates agents under diverse adversarial strategies in stateful environments.
+\paragraph{Adversarial Evaluation} AdvGLUE \cite{wang2021adversarial} and other adversarial NLP benchmarks test model robustness. Prompt injection attacks have been studied \cite{perez2022ignore, liu2023jailbreaking, greshake2023not}, and universal adversarial attacks \cite{zou2023universal} show how safety training can fail \cite{wei2023jailbroken}. However, these primarily focus on single-turn completions rather than multi-turn agent interactions with state. Our work systematically evaluates agents under diverse adversarial strategies in stateful environments.
 
-\paragraph{Formal Verification} Work on formally verified systems \cite{seshia2016towards} provides guarantees but typically for constrained domains. Our safety specification language draws inspiration from temporal logic and runtime verification \cite{leucker2009brief} but focuses on practical evaluation rather than formal proof.
+\paragraph{Formal Verification} Work on formally verified systems \cite{seshia2016towards} provides guarantees but typically for constrained domains. Our safety specification language draws inspiration from temporal logic \cite{pnueli1977temporal}, RBAC models \cite{sandhu1996role}, and runtime verification \cite{leucker2009brief} but focuses on practical evaluation rather than formal proof.
 
 \section{A²-Bench Framework}
 \label{sec:model}
+
+Figure~\ref{fig:architecture} provides an overview of the A²-Bench framework architecture, showing the dual-control model and the layered system design.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/architecture.pdf}
+\caption{A²-Bench architecture. (a) Dual-control security model showing agent and adversary both manipulating shared state under safety monitoring. (b) Layered system architecture from domains through models to evaluation outputs.}
+\label{fig:architecture}
+\end{figure}
 
 \subsection{Dual-Control Security Model}
 
@@ -287,7 +296,7 @@ Our primary implementation focuses on healthcare AI agents with the following co
 
 \subsection{Main Results}
 
-Table~\ref{tab:main_results} shows overall A²-Scores across models.
+Table~\ref{tab:main_results} and Figure~\ref{fig:main_scores} show overall A²-Scores across models.
 
 \begin{table}[h]
 \centering
@@ -306,11 +315,18 @@ Human Baseline & 0.91 & 0.86 & 0.94 & 0.89 & 0.90 \\
 \end{tabular}
 \end{table}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/main_scores.pdf}
+\caption{A²-Bench scores comparison across models. All models score significantly below human baseline (0.90), with security consistently being the weakest dimension.}
+\label{fig:main_scores}
+\end{figure}
+
 \textbf{Key Finding 1}: Even the best model (Claude-3.7) achieves only 59\% overall safety score, with security being the weakest dimension (47\%).
 
 \subsection{Adversarial Attack Success Rates}
 
-Table~\ref{tab:attacks} shows success rates by attack strategy.
+Table~\ref{tab:attacks} and Figure~\ref{fig:attack_heatmap} show success rates by attack strategy.
 
 \begin{table}[h]
 \centering
@@ -328,6 +344,13 @@ Multi-Vector & \textbf{43\%} & \textbf{38\%} & \textbf{42\%} & \textbf{41\%} \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.7\linewidth]{figures/attack_success_heatmap.pdf}
+\caption{Attack success rate heatmap showing vulnerability patterns across models and attack strategies. Darker colors indicate higher success rates. Multi-vector attacks are most effective across all models.}
+\label{fig:attack_heatmap}
+\end{figure}
 
 \textbf{Key Finding 2}: Multi-vector attacks succeed 41\% of the time on average, with prompt injection being most effective single-strategy attack (31\%).
 
