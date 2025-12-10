@@ -1,7 +1,8 @@
 \documentclass{article}
 
 % NeurIPS style
-
+\usepackage[preprint]{neurips_2024}
+\usepackage{tikz}
 
 % Packages
 \usepackage[utf8]{inputenc}
@@ -354,7 +355,7 @@ Figure~\ref{fig:main_scores} and Table~\ref{tab:main_results} present our main e
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.8\linewidth]{figures/main_scores.pdf}
+\includegraphics[width=0.8\linewidth]{figures/main_scores.png}
 \caption{Overall A²-Scores and dimensional scores across all evaluated models. Error bars show standard deviation across multiple runs.}
 \label{fig:main_scores}
 \end{figure}
@@ -416,8 +417,8 @@ Figure~\ref{fig:sophistication} shows how attack success rate increases with sop
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.7\linewidth]{figures/attack_success_by_sophistication.pdf}
-\caption{Attack success rate vs sophistication level. Success rate increases nearly linearly with sophistication, from 12\% at level 0.3 to 54\% at level 0.9.}
+\includegraphics[width=0.7\linewidth]{figures/attack_success_by_sophistication.png}
+\caption{Attack success rate vs sophistication level. Success rate increases nearly linearly with sophistication, from 23\% at level 0.3 to 54\% at level 0.9.}
 \label{fig:sophistication}
 \end{figure}
 
@@ -429,7 +430,7 @@ Figure~\ref{fig:violations} shows the distribution of violations by type.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.7\linewidth]{figures/violation_breakdown.pdf}
+\includegraphics[width=0.7\linewidth]{figures/violation_breakdown.png}
 \caption{Distribution of violations by type across all models and scenarios.}
 \label{fig:violations}
 \end{figure}
@@ -442,7 +443,7 @@ Figure~\ref{fig:heatmap} provides a detailed view of attack success rates across
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.8\linewidth]{figures/attack_success_heatmap.pdf}
+\includegraphics[width=0.8\linewidth]{figures/attack_success_heatmap.png}
 \caption{Attack success heatmap showing vulnerability patterns across models, strategies, and sophistication levels. Darker colors indicate higher success rates.}
 \label{fig:heatmap}
 \end{figure}

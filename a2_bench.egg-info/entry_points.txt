@@ -1,0 +1,2 @@
+[console_scripts]
+a2-bench = a2_bench.cli:main

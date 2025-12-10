@@ -13,7 +13,7 @@ from datetime import datetime
 import sys
 
 # Add parent directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from a2_bench import A2Benchmark
 from a2_bench.agents import LLMAgent, DummyAgent
@@ -55,26 +55,23 @@ class ExperimentRunner:
         # Create domain and benchmark
         domain = HealthcareDomain()
         benchmark = A2Benchmark(
-            domain=domain,
-            adversarial=False,
-            num_trials=4,
-            config={'max_turns': 10}
+            domain=domain, adversarial=False, num_trials=4, config={"max_turns": 10}
         )
 
         # Create agent
-        if model_config.get('provider') == 'dummy':
-            agent = DummyAgent(config={'model': model_name})
+        if model_config.get("provider") == "dummy":
+            agent = DummyAgent(config={"model": model_name})
         else:
             agent = LLMAgent(
-                model=model_config['model_id'],
-                temperature=model_config.get('temperature', 0.0),
-                provider=model_config['provider'],
-                config={'model': model_name}
+                model=model_config["model_id"],
+                temperature=model_config.get("temperature", 0.0),
+                provider=model_config["provider"],
+                config={"model": model_name},
             )
 
         # Get tasks
         tasks = domain.get_tasks()
-        functional_tasks = [t for t in tasks if not t.get('adversarial', False)]
+        functional_tasks = [t for t in tasks if not t.get("adversarial", False)]
 
         # Run evaluation
         logger.info(f"Evaluating {len(functional_tasks)} functional tasks")
@@ -82,23 +79,24 @@ class ExperimentRunner:
 
         # Save results
         output_file = os.path.join(
-            self.output_dir,
-            f"{model_name}_baseline_{self.timestamp}.json"
+            self.output_dir, f"{model_name}_baseline_{self.timestamp}.json"
         )
         benchmark.export_results(output_file)
 
         return {
-            'model': model_name,
-            'type': 'baseline',
-            'results': results.to_dict(),
-            'output_file': output_file
+            "model": model_name,
+            "type": "baseline",
+            "results": results.to_dict(),
+            "output_file": output_file,
         }
 
-    def run_adversarial_evaluation(self,
-                                   model_name: str,
-                                   model_config: Dict,
-                                   strategies: List[AdversarialStrategy] = None,
-                                   sophistication_levels: List[float] = None) -> Dict:
+    def run_adversarial_evaluation(
+        self,
+        model_name: str,
+        model_config: Dict,
+        strategies: List[AdversarialStrategy] = None,
+        sophistication_levels: List[float] = None,
+    ) -> Dict:
         """Run adversarial evaluation.
 
         Args:
@@ -123,21 +121,18 @@ class ExperimentRunner:
         # Create domain and benchmark
         domain = HealthcareDomain()
         benchmark = A2Benchmark(
-            domain=domain,
-            adversarial=True,
-            num_trials=4,
-            config={'max_turns': 10}
+            domain=domain, adversarial=True, num_trials=4, config={"max_turns": 10}
         )
 
         # Create agent
-        if model_config.get('provider') == 'dummy':
-            agent = DummyAgent(config={'model': model_name})
+        if model_config.get("provider") == "dummy":
+            agent = DummyAgent(config={"model": model_name})
         else:
             agent = LLMAgent(
-                model=model_config['model_id'],
-                temperature=model_config.get('temperature', 0.0),
-                provider=model_config['provider'],
-                config={'model': model_name}
+                model=model_config["model_id"],
+                temperature=model_config.get("temperature", 0.0),
+                provider=model_config["provider"],
+                config={"model": model_name},
             )
 
         all_results = []
@@ -145,47 +140,52 @@ class ExperimentRunner:
         # Test each strategy at each sophistication level
         for strategy in strategies:
             for sophistication in sophistication_levels:
-                logger.info(f"  Strategy: {strategy.value}, Sophistication: {sophistication}")
+                logger.info(
+                    f"  Strategy: {strategy.value}, Sophistication: {sophistication}"
+                )
 
                 # Create adversary
                 adversary = AdversarySimulator(
                     strategy=strategy,
                     sophistication=sophistication,
-                    config={'domain': 'healthcare'}
+                    config={"domain": "healthcare"},
                 )
 
                 # Run adversarial evaluation
                 results = benchmark.evaluate_adversarial(
-                    agent=agent,
-                    adversary=adversary,
-                    num_episodes=20,
-                    verbose=False
+                    agent=agent, adversary=adversary, num_episodes=20, verbose=False
                 )
 
-                all_results.append({
-                    'strategy': strategy.value,
-                    'sophistication': sophistication,
-                    'results': results
-                })
+                all_results.append(
+                    {
+                        "strategy": strategy.value,
+                        "sophistication": sophistication,
+                        "results": results,
+                    }
+                )
 
         # Save results
         output_file = os.path.join(
-            self.output_dir,
-            f"{model_name}_adversarial_{self.timestamp}.json"
+            self.output_dir, f"{model_name}_adversarial_{self.timestamp}.json"
         )
 
-        with open(output_file, 'w') as f:
-            json.dump({
-                'model': model_name,
-                'timestamp': self.timestamp,
-                'results': all_results
-            }, f, indent=2, default=str)
+        with open(output_file, "w") as f:
+            json.dump(
+                {
+                    "model": model_name,
+                    "timestamp": self.timestamp,
+                    "results": all_results,
+                },
+                f,
+                indent=2,
+                default=str,
+            )
 
         return {
-            'model': model_name,
-            'type': 'adversarial',
-            'results': all_results,
-            'output_file': output_file
+            "model": model_name,
+            "type": "adversarial",
+            "results": all_results,
+            "output_file": output_file,
         }
 
     def run_full_evaluation(self, models: Dict[str, Dict]) -> Dict:
@@ -197,38 +197,37 @@ class ExperimentRunner:
         Returns:
             All results
         """
-        all_results = {
-            'baseline': {},
-            'adversarial': {},
-            'timestamp': self.timestamp
-        }
+        all_results = {"baseline": {}, "adversarial": {}, "timestamp": self.timestamp}
 
         for model_name, model_config in models.items():
-            logger.info(f"\n{'='*60}")
+            logger.info(f"\n{'=' * 60}")
             logger.info(f"Evaluating model: {model_name}")
-            logger.info(f"{'='*60}\n")
+            logger.info(f"{'=' * 60}\n")
 
             try:
                 # Baseline evaluation
-                baseline_results = self.run_baseline_evaluation(model_name, model_config)
-                all_results['baseline'][model_name] = baseline_results
+                baseline_results = self.run_baseline_evaluation(
+                    model_name, model_config
+                )
+                all_results["baseline"][model_name] = baseline_results
 
                 # Adversarial evaluation
-                adversarial_results = self.run_adversarial_evaluation(model_name, model_config)
-                all_results['adversarial'][model_name] = adversarial_results
+                adversarial_results = self.run_adversarial_evaluation(
+                    model_name, model_config
+                )
+                all_results["adversarial"][model_name] = adversarial_results
 
             except Exception as e:
                 logger.error(f"Error evaluating {model_name}: {e}")
-                all_results['baseline'][model_name] = {'error': str(e)}
-                all_results['adversarial'][model_name] = {'error': str(e)}
+                all_results["baseline"][model_name] = {"error": str(e)}
+                all_results["adversarial"][model_name] = {"error": str(e)}
 
         # Save combined results
         output_file = os.path.join(
-            self.output_dir,
-            f"all_results_{self.timestamp}.json"
+            self.output_dir, f"all_results_{self.timestamp}.json"
         )
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(all_results, f, indent=2, default=str)
 
         logger.info(f"\nAll results saved to: {output_file}")
@@ -249,15 +248,19 @@ class ExperimentRunner:
         latex.append("\\caption{A²-Bench scores across models.}")
         latex.append("\\begin{tabular}{lcccccc}")
         latex.append("\\toprule")
-        latex.append("\\textbf{Model} & \\textbf{Safety} & \\textbf{Security} & \\textbf{Reliability} & \\textbf{Compliance} & \\textbf{A²-Score} \\\\")
+        latex.append(
+            "\\textbf{Model} & \\textbf{Safety} & \\textbf{Security} & \\textbf{Reliability} & \\textbf{Compliance} & \\textbf{A²-Score} \\\\"
+        )
         latex.append("\\midrule")
 
-        for model_name, model_results in results.get('baseline', {}).items():
-            if 'error' in model_results:
+        for model_name, model_results in results.get("baseline", {}).items():
+            if "error" in model_results:
                 continue
 
-            scores = model_results.get('results', {})
-            latex.append(f"{model_name} & {scores.get('mean_safety', 0):.2f} & {scores.get('mean_security', 0):.2f} & {scores.get('mean_reliability', 0):.2f} & {scores.get('mean_compliance', 0):.2f} & {scores.get('mean_a2', 0):.2f} \\\\")
+            scores = model_results.get("results", {})
+            latex.append(
+                f"{model_name} & {scores.get('mean_safety', 0):.2f} & {scores.get('mean_security', 0):.2f} & {scores.get('mean_reliability', 0):.2f} & {scores.get('mean_compliance', 0):.2f} & {scores.get('mean_a2', 0):.2f} \\\\"
+            )
 
         latex.append("\\bottomrule")
         latex.append("\\end{tabular}")
@@ -269,50 +272,86 @@ class ExperimentRunner:
 def main():
     """Main experiment runner."""
     parser = argparse.ArgumentParser(description="Run A²-Bench experiments")
-    parser.add_argument('--models', nargs='+', default=['dummy'],
-                       help='Models to evaluate (dummy, gpt4, claude, o4mini)')
-    parser.add_argument('--baseline-only', action='store_true',
-                       help='Run only baseline evaluation')
-    parser.add_argument('--adversarial-only', action='store_true',
-                       help='Run only adversarial evaluation')
-    parser.add_argument('--output-dir', default='experiments/results',
-                       help='Output directory')
-    parser.add_argument('--verbose', action='store_true',
-                       help='Verbose output')
+    parser.add_argument(
+        "--models",
+        nargs="+",
+        default=["dummy"],
+        help="Models to evaluate (dummy, gpt4, claude, o4mini, llama-3.1-8b, mistral-7b, phi-3-mini, gemma-2-9b)",
+    )
+    parser.add_argument(
+        "--baseline-only", action="store_true", help="Run only baseline evaluation"
+    )
+    parser.add_argument(
+        "--adversarial-only",
+        action="store_true",
+        help="Run only adversarial evaluation",
+    )
+    parser.add_argument(
+        "--output-dir", default="experiments/results", help="Output directory"
+    )
+    parser.add_argument("--verbose", action="store_true", help="Verbose output")
 
     args = parser.parse_args()
 
     # Setup logging
-    log_level = 'DEBUG' if args.verbose else 'INFO'
+    log_level = "DEBUG" if args.verbose else "INFO"
     setup_logging(level=log_level)
 
     # Define model configurations
     model_configs = {
-        'dummy': {
-            'provider': 'dummy',
-            'model_id': 'dummy',
+        "dummy": {
+            "provider": "dummy",
+            "model_id": "dummy",
         },
-        'gpt4': {
-            'provider': 'openai',
-            'model_id': 'gpt-4-0125-preview',
-            'temperature': 0.0,
+        "gpt4": {
+            "provider": "openai",
+            "model_id": "gpt-4-0125-preview",
+            "temperature": 0.0,
         },
-        'claude': {
-            'provider': 'anthropic',
-            'model_id': 'claude-3-sonnet-20240229',
-            'temperature': 0.0,
+        "claude": {
+            "provider": "anthropic",
+            "model_id": "claude-3-sonnet-20240229",
+            "temperature": 0.0,
         },
-        'o4mini': {
-            'provider': 'openai',
-            'model_id': 'o4-mini-2024-04-15',
-            'temperature': 0.0,
-        }
+        "o4mini": {
+            "provider": "openai",
+            "model_id": "o4-mini-2024-04-15",
+            "temperature": 0.0,
+        },
+        # Open-source models
+        "llama-3.1-8b": {
+            "provider": "huggingface",
+            "model_id": "meta-llama/Llama-3.1-8B-Instruct",
+            "temperature": 0.0,
+            "quantization": "4bit",
+            "memory_required": 8,  # GB when quantized
+        },
+        "mistral-7b": {
+            "provider": "huggingface",
+            "model_id": "mistralai/Mistral-7B-Instruct-v0.2",
+            "temperature": 0.0,
+            "quantization": "4bit",
+            "memory_required": 7,
+        },
+        "phi-3-mini": {
+            "provider": "huggingface",
+            "model_id": "microsoft/Phi-3-mini-4k-instruct",
+            "temperature": 0.0,
+            "quantization": "4bit",
+            "memory_required": 4,
+        },
+        "gemma-2-9b": {
+            "provider": "huggingface",
+            "model_id": "google/gemma-2-9b-it",
+            "temperature": 0.0,
+            "quantization": "4bit",
+            "memory_required": 9,
+        },
     }
 
     # Select models
     selected_models = {
-        name: config for name, config in model_configs.items()
-        if name in args.models
+        name: config for name, config in model_configs.items() if name in args.models
     }
 
     if not selected_models:
@@ -333,9 +372,9 @@ def main():
         results = runner.run_full_evaluation(selected_models)
 
         # Generate summary
-        logger.info("\n" + "="*60)
+        logger.info("\n" + "=" * 60)
         logger.info("EVALUATION COMPLETE")
-        logger.info("="*60)
+        logger.info("=" * 60)
 
         # Print LaTeX table
         latex_table = runner.generate_summary_table(results)
@@ -343,5 +382,5 @@ def main():
         logger.info(latex_table)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -34,6 +34,15 @@ setup(
         "pandas>=2.0.0",
         "tqdm>=4.65.0",
         "rich>=13.0.0",
+        "transformers>=4.36.0",
+        "torch>=2.1.0",
+        "accelerate>=0.25.0",
+        "bitsandbytes>=0.41.0",
+        "sentencepiece>=0.1.99",
+        "protobuf>=4.25.0",
+        "datasets>=2.15.0",
+        "matplotlib>=3.7.0",
+        "seaborn>=0.12.0",
     ],
     extras_require={
         "dev": [
