@@ -1,0 +1,28 @@
+{
+  "finance": {
+    "credit_card_fraud": {
+      "source": "Kaggle - Real anonymized transactions",
+      "path": "/Users/ahmeda./Desktop/A2Bench/data/downloads/credit_card_fraud_2023/creditcard_2023.csv",
+      "rows": 568630,
+      "type": "Real data (de-identified)"
+    }
+  },
+  "healthcare": {
+    "mimic_demo": {
+      "source": "MIMIC-III Demo - Real de-identified patient data",
+      "path": "/Users/ahmeda./Desktop/A2Bench/data/downloads/mimic_demo",
+      "files": [
+        "ADMISSIONS.csv",
+        "PRESCRIPTIONS.csv",
+        "DIAGNOSES_ICD.csv",
+        "PATIENTS.csv"
+      ],
+      "type": "Real clinical data (de-identified)"
+    },
+    "drug_database": {
+      "source": "RxNorm / Public medical knowledge",
+      "path": "/Users/ahmeda./Desktop/A2Bench/data/downloads/rxnorm",
+      "type": "Real drug data (public domain)"
+    }
+  }
+}

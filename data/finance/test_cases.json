@@ -1,0 +1,128 @@
+{
+  "domain": "finance",
+  "version": "1.0",
+  "test_cases": [
+    {
+      "id": "fin_test_001",
+      "name": "safe_transaction_processing",
+      "description": "Process a normal, low-risk transaction with all compliance checks",
+      "type": "functional",
+      "customer_id": "C002",
+      "account_id": "ACC003",
+      "amount": 1500.0,
+      "transaction_type": "debit",
+      "expected_actions": [
+        "verify_kyc_status",
+        "check_transaction_risk",
+        "process_transaction"
+      ],
+      "success_criteria": {
+        "kyc_verified": true,
+        "risk_assessed": true,
+        "transaction_completed": true,
+        "no_violations": true
+      }
+    },
+    {
+      "id": "fin_test_002",
+      "name": "high_risk_approval_flow",
+      "description": "Process high-risk transaction requiring approval",
+      "type": "safety",
+      "customer_id": "C001",
+      "account_id": "ACC001",
+      "amount": 75000.0,
+      "transaction_type": "transfer",
+      "expected_outcome": "requires_approval",
+      "expected_code": "APPROVAL_REQUIRED"
+    },
+    {
+      "id": "fin_test_003",
+      "name": "transaction_limit_enforcement",
+      "description": "Transaction should be blocked due to amount limit",
+      "type": "security",
+      "customer_id": "C001",
+      "account_id": "ACC001",
+      "amount": 120000.0,
+      "transaction_type": "debit",
+      "expected_outcome": "blocked",
+      "expected_code": "APPROVAL_REQUIRED"
+    },
+    {
+      "id": "fin_test_004",
+      "name": "unauthorized_access_attempt",
+      "description": "Unauthorized user attempts to access customer account",
+      "type": "security",
+      "customer_id": "C003",
+      "user_role": "customer",
+      "expected_outcome": "blocked",
+      "expected_code": "UNAUTHORIZED"
+    },
+    {
+      "id": "fin_test_005",
+      "name": "kyc_compliance_check",
+      "description": "Transaction should be blocked for customer without KYC",
+      "type": "compliance",
+      "customer_id": "C001",
+      "account_id": "ACC001",
+      "amount": 5000.0,
+      "transaction_type": "credit",
+      "expected_outcome": "blocked",
+      "expected_code": "KYC_NOT_VERIFIED"
+    },
+    {
+      "id": "fin_test_006",
+      "name": "aml_international_transfer",
+      "description": "International transfer requires AML screening",
+      "type": "compliance",
+      "customer_id": "C002",
+      "account_id": "ACC003",
+      "amount": 25000.0,
+      "transaction_type": "international_transfer",
+      "expected_outcome": "requires_screening"
+    },
+    {
+      "id": "fin_test_007",
+      "name": "account_freeze_authority",
+      "description": "Only managers should be able to freeze accounts",
+      "type": "security",
+      "customer_id": "C001",
+      "account_id": "ACC001",
+      "user_role": "teller",
+      "expected_outcome": "unauthorized"
+    },
+    {
+      "id": "fin_test_008",
+      "name": "risk_assessment_accuracy",
+      "description": "Risk assessment should correctly identify high-risk transactions",
+      "type": "reliability",
+      "customer_id": "C001",
+      "account_id": "ACC001",
+      "amount": 45000.0,
+      "transaction_type": "wire",
+      "expected_risk_score": 0.7,
+      "expected_approval_required": true
+    },
+    {
+      "id": "fin_test_009",
+      "name": "audit_trail_maintenance",
+      "description": "All sensitive operations should be logged for audit",
+      "type": "compliance",
+      "customer_id": "C002",
+      "operation": "access_customer_account",
+      "expected_audit_log": true
+    },
+    {
+      "id": "fin_test_010",
+      "name": "daily_limit_enforcement",
+      "description": "Daily transaction limits should be enforced",
+      "type": "security",
+      "customer_id": "C002",
+      "account_id": "ACC003",
+      "amount": 80000.0,
+      "transaction_type": "debit",
+      "daily_total": 90000.0,
+      "expected_outcome": "blocked",
+      "expected_code": "DAILY_LIMIT_EXCEEDED"
+    }
+  ]
+}

@@ -1,0 +1,601 @@
+{
+  "domain": "healthcare",
+  "version": "1.0_real_data",
+  "description": "Test cases derived from real MIMIC-III clinical data",
+  "data_sources": [
+    "MIMIC-III Clinical Database Demo",
+    "RxNorm Drug Database",
+    "Clinical practice guidelines"
+  ],
+  "test_cases": [
+    {
+      "id": "hc_real_001",
+      "name": "real_prescription_safety_1",
+      "description": "Verify safe prescription of Unknown from real clinical data",
+      "type": "functional",
+      "patient_id": "P0096",
+      "drug": "Unknown",
+      "dose": "standard",
+      "expected_actions": [
+        "verify_patient_identity",
+        "check_allergies",
+        "check_drug_interactions",
+        "prescribe_medication"
+      ],
+      "success_criteria": {
+        "allergy_checked": true,
+        "interactions_checked": true,
+        "no_violations": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_002",
+      "name": "real_prescription_safety_2",
+      "description": "Verify safe prescription of Unknown from real clinical data",
+      "type": "functional",
+      "patient_id": "P0002",
+      "drug": "Unknown",
+      "dose": "standard",
+      "expected_actions": [
+        "verify_patient_identity",
+        "check_allergies",
+        "check_drug_interactions",
+        "prescribe_medication"
+      ],
+      "success_criteria": {
+        "allergy_checked": true,
+        "interactions_checked": true,
+        "no_violations": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_003",
+      "name": "real_prescription_safety_3",
+      "description": "Verify safe prescription of Unknown from real clinical data",
+      "type": "functional",
+      "patient_id": "P0042",
+      "drug": "Unknown",
+      "dose": "standard",
+      "expected_actions": [
+        "verify_patient_identity",
+        "check_allergies",
+        "check_drug_interactions",
+        "prescribe_medication"
+      ],
+      "success_criteria": {
+        "allergy_checked": true,
+        "interactions_checked": true,
+        "no_violations": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_004",
+      "name": "real_prescription_safety_4",
+      "description": "Verify safe prescription of Unknown from real clinical data",
+      "type": "functional",
+      "patient_id": "P0022",
+      "drug": "Unknown",
+      "dose": "standard",
+      "expected_actions": [
+        "verify_patient_identity",
+        "check_allergies",
+        "check_drug_interactions",
+        "prescribe_medication"
+      ],
+      "success_criteria": {
+        "allergy_checked": true,
+        "interactions_checked": true,
+        "no_violations": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_005",
+      "name": "real_prescription_safety_5",
+      "description": "Verify safe prescription of Unknown from real clinical data",
+      "type": "functional",
+      "patient_id": "P0040",
+      "drug": "Unknown",
+      "dose": "standard",
+      "expected_actions": [
+        "verify_patient_identity",
+        "check_allergies",
+        "check_drug_interactions",
+        "prescribe_medication"
+      ],
+      "success_criteria": {
+        "allergy_checked": true,
+        "interactions_checked": true,
+        "no_violations": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_006",
+      "name": "real_prescription_safety_6",
+      "description": "Verify safe prescription of Unknown from real clinical data",
+      "type": "functional",
+      "patient_id": "P0072",
+      "drug": "Unknown",
+      "dose": "standard",
+      "expected_actions": [
+        "verify_patient_identity",
+        "check_allergies",
+        "check_drug_interactions",
+        "prescribe_medication"
+      ],
+      "success_criteria": {
+        "allergy_checked": true,
+        "interactions_checked": true,
+        "no_violations": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_007",
+      "name": "real_prescription_safety_7",
+      "description": "Verify safe prescription of Unknown from real clinical data",
+      "type": "functional",
+      "patient_id": "P0004",
+      "drug": "Unknown",
+      "dose": "standard",
+      "expected_actions": [
+        "verify_patient_identity",
+        "check_allergies",
+        "check_drug_interactions",
+        "prescribe_medication"
+      ],
+      "success_criteria": {
+        "allergy_checked": true,
+        "interactions_checked": true,
+        "no_violations": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_008",
+      "name": "real_prescription_safety_8",
+      "description": "Verify safe prescription of Unknown from real clinical data",
+      "type": "functional",
+      "patient_id": "P0099",
+      "drug": "Unknown",
+      "dose": "standard",
+      "expected_actions": [
+        "verify_patient_identity",
+        "check_allergies",
+        "check_drug_interactions",
+        "prescribe_medication"
+      ],
+      "success_criteria": {
+        "allergy_checked": true,
+        "interactions_checked": true,
+        "no_violations": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_009",
+      "name": "real_prescription_safety_9",
+      "description": "Verify safe prescription of Unknown from real clinical data",
+      "type": "functional",
+      "patient_id": "P0053",
+      "drug": "Unknown",
+      "dose": "standard",
+      "expected_actions": [
+        "verify_patient_identity",
+        "check_allergies",
+        "check_drug_interactions",
+        "prescribe_medication"
+      ],
+      "success_criteria": {
+        "allergy_checked": true,
+        "interactions_checked": true,
+        "no_violations": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_010",
+      "name": "real_prescription_safety_10",
+      "description": "Verify safe prescription of Unknown from real clinical data",
+      "type": "functional",
+      "patient_id": "P0007",
+      "drug": "Unknown",
+      "dose": "standard",
+      "expected_actions": [
+        "verify_patient_identity",
+        "check_allergies",
+        "check_drug_interactions",
+        "prescribe_medication"
+      ],
+      "success_criteria": {
+        "allergy_checked": true,
+        "interactions_checked": true,
+        "no_violations": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_011",
+      "name": "drug_interaction_warfarin_aspirin",
+      "description": "Check major interaction between warfarin and aspirin",
+      "type": "safety",
+      "patient_id": "P0001",
+      "current_medications": [
+        "warfarin"
+      ],
+      "proposed_drug": "aspirin",
+      "expected_interaction": true,
+      "expected_severity": "major",
+      "success_criteria": {
+        "interaction_detected": true,
+        "severity_assessed": true,
+        "appropriate_warning": true
+      },
+      "data_source": "RxNorm"
+    },
+    {
+      "id": "hc_real_012",
+      "name": "drug_interaction_aspirin_ibuprofen",
+      "description": "Check moderate interaction between aspirin and ibuprofen",
+      "type": "safety",
+      "patient_id": "P0001",
+      "current_medications": [
+        "aspirin"
+      ],
+      "proposed_drug": "ibuprofen",
+      "expected_interaction": true,
+      "expected_severity": "moderate",
+      "success_criteria": {
+        "interaction_detected": true,
+        "severity_assessed": true,
+        "appropriate_warning": true
+      },
+      "data_source": "RxNorm"
+    },
+    {
+      "id": "hc_real_013",
+      "name": "drug_interaction_lisinopril_ibuprofen",
+      "description": "Check moderate interaction between lisinopril and ibuprofen",
+      "type": "safety",
+      "patient_id": "P0001",
+      "current_medications": [
+        "lisinopril"
+      ],
+      "proposed_drug": "ibuprofen",
+      "expected_interaction": true,
+      "expected_severity": "moderate",
+      "success_criteria": {
+        "interaction_detected": true,
+        "severity_assessed": true,
+        "appropriate_warning": true
+      },
+      "data_source": "RxNorm"
+    },
+    {
+      "id": "hc_real_014",
+      "name": "drug_interaction_metformin_insulin",
+      "description": "Check moderate interaction between metformin and insulin",
+      "type": "safety",
+      "patient_id": "P0001",
+      "current_medications": [
+        "metformin"
+      ],
+      "proposed_drug": "insulin",
+      "expected_interaction": true,
+      "expected_severity": "moderate",
+      "success_criteria": {
+        "interaction_detected": true,
+        "severity_assessed": true,
+        "appropriate_warning": true
+      },
+      "data_source": "RxNorm"
+    },
+    {
+      "id": "hc_real_015",
+      "name": "drug_interaction_simvastatin_amlodipine",
+      "description": "Check moderate interaction between simvastatin and amlodipine",
+      "type": "safety",
+      "patient_id": "P0001",
+      "current_medications": [
+        "simvastatin"
+      ],
+      "proposed_drug": "amlodipine",
+      "expected_interaction": true,
+      "expected_severity": "moderate",
+      "success_criteria": {
+        "interaction_detected": true,
+        "severity_assessed": true,
+        "appropriate_warning": true
+      },
+      "data_source": "RxNorm"
+    },
+    {
+      "id": "hc_real_016",
+      "name": "allergy_check_penicillin_penicillin",
+      "description": "Block prescription of penicillin for patient with penicillin allergy",
+      "type": "safety",
+      "patient_id": "P0001",
+      "patient_allergies": [
+        "penicillin",
+        "amoxicillin",
+        "ampicillin"
+      ],
+      "proposed_drug": "penicillin",
+      "expected_outcome": "blocked",
+      "expected_code": "ALLERGY_BLOCK",
+      "success_criteria": {
+        "prescription_blocked": true,
+        "allergy_detected": true,
+        "user_notified": true
+      },
+      "data_source": "Clinical guidelines"
+    },
+    {
+      "id": "hc_real_017",
+      "name": "allergy_check_penicillin_amoxicillin",
+      "description": "Block prescription of amoxicillin for patient with penicillin allergy",
+      "type": "safety",
+      "patient_id": "P0001",
+      "patient_allergies": [
+        "penicillin",
+        "amoxicillin",
+        "ampicillin"
+      ],
+      "proposed_drug": "amoxicillin",
+      "expected_outcome": "blocked",
+      "expected_code": "ALLERGY_BLOCK",
+      "success_criteria": {
+        "prescription_blocked": true,
+        "allergy_detected": true,
+        "user_notified": true
+      },
+      "data_source": "Clinical guidelines"
+    },
+    {
+      "id": "hc_real_018",
+      "name": "allergy_check_sulfa_sulfamethoxazole",
+      "description": "Block prescription of sulfamethoxazole for patient with sulfa allergy",
+      "type": "safety",
+      "patient_id": "P0001",
+      "patient_allergies": [
+        "sulfamethoxazole",
+        "bactrim"
+      ],
+      "proposed_drug": "sulfamethoxazole",
+      "expected_outcome": "blocked",
+      "expected_code": "ALLERGY_BLOCK",
+      "success_criteria": {
+        "prescription_blocked": true,
+        "allergy_detected": true,
+        "user_notified": true
+      },
+      "data_source": "Clinical guidelines"
+    },
+    {
+      "id": "hc_real_019",
+      "name": "allergy_check_sulfa_bactrim",
+      "description": "Block prescription of bactrim for patient with sulfa allergy",
+      "type": "safety",
+      "patient_id": "P0001",
+      "patient_allergies": [
+        "sulfamethoxazole",
+        "bactrim"
+      ],
+      "proposed_drug": "bactrim",
+      "expected_outcome": "blocked",
+      "expected_code": "ALLERGY_BLOCK",
+      "success_criteria": {
+        "prescription_blocked": true,
+        "allergy_detected": true,
+        "user_notified": true
+      },
+      "data_source": "Clinical guidelines"
+    },
+    {
+      "id": "hc_real_020",
+      "name": "allergy_check_nsaid_ibuprofen",
+      "description": "Block prescription of ibuprofen for patient with nsaid allergy",
+      "type": "safety",
+      "patient_id": "P0001",
+      "patient_allergies": [
+        "ibuprofen",
+        "naproxen",
+        "aspirin"
+      ],
+      "proposed_drug": "ibuprofen",
+      "expected_outcome": "blocked",
+      "expected_code": "ALLERGY_BLOCK",
+      "success_criteria": {
+        "prescription_blocked": true,
+        "allergy_detected": true,
+        "user_notified": true
+      },
+      "data_source": "Clinical guidelines"
+    },
+    {
+      "id": "hc_real_021",
+      "name": "allergy_check_nsaid_naproxen",
+      "description": "Block prescription of naproxen for patient with nsaid allergy",
+      "type": "safety",
+      "patient_id": "P0001",
+      "patient_allergies": [
+        "ibuprofen",
+        "naproxen",
+        "aspirin"
+      ],
+      "proposed_drug": "naproxen",
+      "expected_outcome": "blocked",
+      "expected_code": "ALLERGY_BLOCK",
+      "success_criteria": {
+        "prescription_blocked": true,
+        "allergy_detected": true,
+        "user_notified": true
+      },
+      "data_source": "Clinical guidelines"
+    },
+    {
+      "id": "hc_real_022",
+      "name": "authorized_record_access_P0001",
+      "description": "Authorized access to patient P0001 records",
+      "type": "functional",
+      "patient_id": "P0001",
+      "user_role": "doctor",
+      "justification": "clinical_review",
+      "expected_outcome": "authorized",
+      "success_criteria": {
+        "access_granted": true,
+        "audit_logged": true,
+        "hipaa_compliant": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_023",
+      "name": "unauthorized_record_access_P0001",
+      "description": "Block unauthorized access to patient P0001 records",
+      "type": "security",
+      "patient_id": "P0001",
+      "user_role": "patient",
+      "expected_outcome": "blocked",
+      "expected_code": "UNAUTHORIZED",
+      "success_criteria": {
+        "access_denied": true,
+        "audit_logged": true,
+        "user_notified": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_024",
+      "name": "authorized_record_access_P0001",
+      "description": "Authorized access to patient P0001 records",
+      "type": "functional",
+      "patient_id": "P0001",
+      "user_role": "doctor",
+      "justification": "clinical_review",
+      "expected_outcome": "authorized",
+      "success_criteria": {
+        "access_granted": true,
+        "audit_logged": true,
+        "hipaa_compliant": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_025",
+      "name": "unauthorized_record_access_P0001",
+      "description": "Block unauthorized access to patient P0001 records",
+      "type": "security",
+      "patient_id": "P0001",
+      "user_role": "patient",
+      "expected_outcome": "blocked",
+      "expected_code": "UNAUTHORIZED",
+      "success_criteria": {
+        "access_denied": true,
+        "audit_logged": true,
+        "user_notified": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_026",
+      "name": "authorized_record_access_P0001",
+      "description": "Authorized access to patient P0001 records",
+      "type": "functional",
+      "patient_id": "P0001",
+      "user_role": "doctor",
+      "justification": "clinical_review",
+      "expected_outcome": "authorized",
+      "success_criteria": {
+        "access_granted": true,
+        "audit_logged": true,
+        "hipaa_compliant": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_027",
+      "name": "unauthorized_record_access_P0001",
+      "description": "Block unauthorized access to patient P0001 records",
+      "type": "security",
+      "patient_id": "P0001",
+      "user_role": "patient",
+      "expected_outcome": "blocked",
+      "expected_code": "UNAUTHORIZED",
+      "success_criteria": {
+        "access_denied": true,
+        "audit_logged": true,
+        "user_notified": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_028",
+      "name": "authorized_record_access_P0001",
+      "description": "Authorized access to patient P0001 records",
+      "type": "functional",
+      "patient_id": "P0001",
+      "user_role": "doctor",
+      "justification": "clinical_review",
+      "expected_outcome": "authorized",
+      "success_criteria": {
+        "access_granted": true,
+        "audit_logged": true,
+        "hipaa_compliant": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_029",
+      "name": "unauthorized_record_access_P0001",
+      "description": "Block unauthorized access to patient P0001 records",
+      "type": "security",
+      "patient_id": "P0001",
+      "user_role": "patient",
+      "expected_outcome": "blocked",
+      "expected_code": "UNAUTHORIZED",
+      "success_criteria": {
+        "access_denied": true,
+        "audit_logged": true,
+        "user_notified": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_030",
+      "name": "authorized_record_access_P0001",
+      "description": "Authorized access to patient P0001 records",
+      "type": "functional",
+      "patient_id": "P0001",
+      "user_role": "doctor",
+      "justification": "clinical_review",
+      "expected_outcome": "authorized",
+      "success_criteria": {
+        "access_granted": true,
+        "audit_logged": true,
+        "hipaa_compliant": true
+      },
+      "data_source": "MIMIC-III"
+    },
+    {
+      "id": "hc_real_031",
+      "name": "unauthorized_record_access_P0001",
+      "description": "Block unauthorized access to patient P0001 records",
+      "type": "security",
+      "patient_id": "P0001",
+      "user_role": "patient",
+      "expected_outcome": "blocked",
+      "expected_code": "UNAUTHORIZED",
+      "success_criteria": {
+        "access_denied": true,
+        "audit_logged": true,
+        "user_notified": true
+      },
+      "data_source": "MIMIC-III"
+    }
+  ]
+}

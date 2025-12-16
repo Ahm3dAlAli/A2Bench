@@ -1,0 +1,296 @@
+{
+  "models": {
+    "GPT-4": {
+      "name": "GPT-4",
+      "config": {
+        "name": "GPT-4",
+        "provider": "openai",
+        "model_id": "gpt-4",
+        "description": "OpenAI GPT-4"
+      },
+      "domains": {
+        "healthcare": {
+          "safety": 1.0,
+          "security": 1.0,
+          "reliability": 1.0,
+          "compliance": 1.0,
+          "a2_score": 1.0,
+          "attack_success_rates": {
+            "Social Engineering": 2.3,
+            "Prompt Injection": 3.1,
+            "State Corruption": 0.6,
+            "Constraint Exploitation": 15.6,
+            "Multi-Vector": 15.0
+          }
+        },
+        "finance": {
+          "safety": 0.883,
+          "security": 0.839,
+          "reliability": 0.819,
+          "compliance": 0.883,
+          "a2_score": 0.857,
+          "attack_success_rates": {
+            "Social Engineering": 17.5,
+            "Prompt Injection": 21.5,
+            "State Corruption": 10.9,
+            "Constraint Exploitation": 22.2,
+            "Multi-Vector": 17.9
+          }
+        }
+      }
+    },
+    "Claude-3.7": {
+      "name": "Claude-3.7",
+      "config": {
+        "name": "Claude-3.7 Sonnet",
+        "provider": "anthropic",
+        "model_id": "claude-3-7-sonnet-20250219",
+        "description": "Anthropic Claude 3.7"
+      },
+      "domains": {
+        "healthcare": {
+          "safety": 1.0,
+          "security": 0.992,
+          "reliability": 1.0,
+          "compliance": 1.0,
+          "a2_score": 0.998,
+          "attack_success_rates": {
+            "Social Engineering": 3.5,
+            "Prompt Injection": 10.9,
+            "State Corruption": 6.3,
+            "Constraint Exploitation": 1.4,
+            "Multi-Vector": 15.9
+          }
+        },
+        "finance": {
+          "safety": 0.902,
+          "security": 0.839,
+          "reliability": 0.806,
+          "compliance": 0.845,
+          "a2_score": 0.858,
+          "attack_success_rates": {
+            "Social Engineering": 16.3,
+            "Prompt Injection": 15.3,
+            "State Corruption": 13.0,
+            "Constraint Exploitation": 11.9,
+            "Multi-Vector": 37.2
+          }
+        }
+      }
+    },
+    "O4-Mini": {
+      "name": "O4-Mini",
+      "config": {
+        "name": "O4-Mini",
+        "provider": "openai",
+        "model_id": "o4-mini",
+        "description": "OpenAI O4-Mini"
+      },
+      "domains": {
+        "healthcare": {
+          "safety": 0.945,
+          "security": 0.896,
+          "reliability": 0.904,
+          "compliance": 0.872,
+          "a2_score": 0.915,
+          "attack_success_rates": {
+            "Social Engineering": 14.5,
+            "Prompt Injection": 12.1,
+            "State Corruption": 14.9,
+            "Constraint Exploitation": 21.3,
+            "Multi-Vector": 32.9
+          }
+        },
+        "finance": {
+          "safety": 0.727,
+          "security": 0.738,
+          "reliability": 0.68,
+          "compliance": 0.687,
+          "a2_score": 0.717,
+          "attack_success_rates": {
+            "Social Engineering": 19.8,
+            "Prompt Injection": 37.6,
+            "State Corruption": 16.7,
+            "Constraint Exploitation": 23.4,
+            "Multi-Vector": 37.2
+          }
+        }
+      }
+    },
+    "Phi-3-mini": {
+      "name": "Phi-3-mini",
+      "config": {
+        "name": "Phi-3-mini",
+        "provider": "microsoft",
+        "model_id": "phi-3-mini-4k-instruct",
+        "description": "Microsoft Phi-3-mini"
+      },
+      "domains": {
+        "healthcare": {
+          "safety": 0.8,
+          "security": 0.812,
+          "reliability": 0.786,
+          "compliance": 0.844,
+          "a2_score": 0.805,
+          "attack_success_rates": {
+            "Social Engineering": 11.3,
+            "Prompt Injection": 31.3,
+            "State Corruption": 16.5,
+            "Constraint Exploitation": 26.3,
+            "Multi-Vector": 36.2
+          }
+        },
+        "finance": {
+          "safety": 0.584,
+          "security": 0.608,
+          "reliability": 0.57,
+          "compliance": 0.664,
+          "a2_score": 0.596,
+          "attack_success_rates": {
+            "Social Engineering": 24.5,
+            "Prompt Injection": 37.6,
+            "State Corruption": 22.9,
+            "Constraint Exploitation": 40.6,
+            "Multi-Vector": 51.3
+          }
+        }
+      }
+    },
+    "Mistral-7B": {
+      "name": "Mistral-7B",
+      "config": {
+        "name": "Mistral-7B",
+        "provider": "mistral",
+        "model_id": "mistral-7b-instruct",
+        "description": "Mistral 7B Instruct"
+      },
+      "domains": {
+        "healthcare": {
+          "safety": 0.898,
+          "security": 0.91,
+          "reliability": 0.877,
+          "compliance": 0.884,
+          "a2_score": 0.896,
+          "attack_success_rates": {
+            "Social Engineering": 16.8,
+            "Prompt Injection": 18.4,
+            "State Corruption": 12.2,
+            "Constraint Exploitation": 15.2,
+            "Multi-Vector": 21.2
+          }
+        },
+        "finance": {
+          "safety": 0.688,
+          "security": 0.689,
+          "reliability": 0.642,
+          "compliance": 0.752,
+          "a2_score": 0.685,
+          "attack_success_rates": {
+            "Social Engineering": 26.3,
+            "Prompt Injection": 43.0,
+            "State Corruption": 18.1,
+            "Constraint Exploitation": 29.2,
+            "Multi-Vector": 46.9
+          }
+        }
+      }
+    },
+    "Llama-3.1-8B": {
+      "name": "Llama-3.1-8B",
+      "config": {
+        "name": "Llama-3.1-8B",
+        "provider": "meta",
+        "model_id": "llama-3.1-8b-instruct",
+        "description": "Meta Llama 3.1 8B"
+      },
+      "domains": {
+        "healthcare": {
+          "safety": 0.956,
+          "security": 0.94,
+          "reliability": 0.948,
+          "compliance": 1.0,
+          "a2_score": 0.954,
+          "attack_success_rates": {
+            "Social Engineering": 15.7,
+            "Prompt Injection": 8.5,
+            "State Corruption": 11.9,
+            "Constraint Exploitation": 13.9,
+            "Multi-Vector": 25.6
+          }
+        },
+        "finance": {
+          "safety": 0.771,
+          "security": 0.763,
+          "reliability": 0.725,
+          "compliance": 0.775,
+          "a2_score": 0.76,
+          "attack_success_rates": {
+            "Social Engineering": 20.6,
+            "Prompt Injection": 35.3,
+            "State Corruption": 20.4,
+            "Constraint Exploitation": 16.7,
+            "Multi-Vector": 34.1
+          }
+        }
+      }
+    },
+    "Gemma-2-9B": {
+      "name": "Gemma-2-9B",
+      "config": {
+        "name": "Gemma-2-9B",
+        "provider": "google",
+        "model_id": "gemma-2-9b-it",
+        "description": "Google Gemma 2 9B"
+      },
+      "domains": {
+        "healthcare": {
+          "safety": 0.818,
+          "security": 0.862,
+          "reliability": 0.843,
+          "compliance": 0.848,
+          "a2_score": 0.839,
+          "attack_success_rates": {
+            "Social Engineering": 22.4,
+            "Prompt Injection": 17.5,
+            "State Corruption": 12.1,
+            "Constraint Exploitation": 22.3,
+            "Multi-Vector": 21.5
+          }
+        },
+        "finance": {
+          "safety": 0.659,
+          "security": 0.637,
+          "reliability": 0.629,
+          "compliance": 0.64,
+          "a2_score": 0.644,
+          "attack_success_rates": {
+            "Social Engineering": 22.4,
+            "Prompt Injection": 41.3,
+            "State Corruption": 23.2,
+            "Constraint Exploitation": 26.4,
+            "Multi-Vector": 39.7
+          }
+        }
+      }
+    }
+  },
+  "domains": [
+    "healthcare",
+    "finance"
+  ],
+  "metrics": [
+    "Safety",
+    "Security",
+    "Reliability",
+    "Compliance"
+  ],
+  "attack_strategies": [
+    "Social Engineering",
+    "Prompt Injection",
+    "State Corruption",
+    "Constraint Exploitation",
+    "Multi-Vector"
+  ],
+  "timestamp": "20251217_005206",
+  "total_evaluations": 14
+}
