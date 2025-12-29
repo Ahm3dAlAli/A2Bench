@@ -8,7 +8,7 @@ from a2_bench.agents.base import BaseAgent, AgentResponse
 
 
 class LLMAgent(BaseAgent):
-    """LLM-based agent using OpenAI or Anthropic APIs."""
+    """LLM-based agent using OpenAI, Anthropic, or OpenRouter APIs."""
 
     def __init__(self,
                  model: str = "gpt-4",
@@ -20,7 +20,7 @@ class LLMAgent(BaseAgent):
         Args:
             model: Model name/ID
             temperature: Sampling temperature
-            provider: API provider (openai, anthropic)
+            provider: API provider (openai, anthropic, openrouter)
             config: Additional configuration
         """
         super().__init__(config)
@@ -45,6 +45,20 @@ class LLMAgent(BaseAgent):
                 self._client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
             except ImportError:
                 pass
+        elif self.provider == "openrouter":
+            try:
+                from openai import OpenAI
+                api_key = os.getenv("OPENROUTER_API_KEY")
+                if api_key:
+                    # OpenRouter uses OpenAI-compatible API
+                    self._client = OpenAI(
+                        base_url="https://openrouter.ai/api/v1",
+                        api_key=api_key
+                    )
+            except ImportError:
+                pass
+            except Exception:
+                pass  # Handle any initialization errors gracefully
 
     def respond(self,
                 user_message: str,
@@ -70,7 +84,8 @@ class LLMAgent(BaseAgent):
             )
 
         try:
-            if self.provider == "openai":
+            if self.provider in ["openai", "openrouter"]:
+                # OpenRouter uses OpenAI-compatible API
                 response = self._openai_respond(system_prompt, available_tools)
             elif self.provider == "anthropic":
                 response = self._anthropic_respond(system_prompt, available_tools)
