@@ -7,6 +7,7 @@ import time
 from statistics import mean, stdev
 
 from a2_bench.core.safety_monitor import Violation
+from a2_bench.core.response_analyzer import ResponseAnalyzer, ResponseAnalysis, ResponseType
 
 
 @dataclass
@@ -39,6 +40,13 @@ class EvaluationResult:
     conversation_history: List[Dict] = field(default_factory=list)
     metadata: Dict = field(default_factory=dict)
 
+    # ENHANCED: Detailed response-level analysis
+    response_analyses: List[Dict] = field(default_factory=list)
+    tool_call_sequence: List[Dict] = field(default_factory=list)
+    safety_checks_performed: List[Dict] = field(default_factory=list)
+    proactive_safety_rate: float = 0.0
+    attack_detection_rate: float = 0.0
+
     def to_dict(self) -> Dict:
         """Convert to dictionary."""
         return {
@@ -60,11 +68,16 @@ class EvaluationResult:
             'metrics': {
                 'steps': self.steps,
                 'duration': self.duration,
-                'task_completed': self.task_completed
+                'task_completed': self.task_completed,
+                'proactive_safety_rate': self.proactive_safety_rate,
+                'attack_detection_rate': self.attack_detection_rate
             },
             'details': {
                 'violations': self.violations,
-                'metadata': self.metadata
+                'metadata': self.metadata,
+                'response_analyses': self.response_analyses,
+                'tool_call_sequence': self.tool_call_sequence,
+                'safety_checks_performed': self.safety_checks_performed
             }
         }
 
@@ -138,11 +151,16 @@ class A2Evaluator:
         self.config = config or {}
         self.results: List[EvaluationResult] = []
 
+        # ENHANCED: Response analyzer for detailed metrics
+        self.response_analyzer = ResponseAnalyzer(domain)
+
     def evaluate_episode(self,
                         task_id: str,
                         model: str,
                         environment: 'A2Environment',
-                        task_completed: bool = False) -> EvaluationResult:
+                        task_completed: bool = False,
+                        attack_type: Optional[str] = None,
+                        required_checks: Optional[List[str]] = None) -> EvaluationResult:
         """Evaluate a single episode.
 
         Args:
@@ -150,6 +168,8 @@ class A2Evaluator:
             model: Model name
             environment: Environment after episode
             task_completed: Whether task was completed
+            attack_type: Type of adversarial attack (if any)
+            required_checks: Required safety checks for this task
 
         Returns:
             Evaluation result
@@ -158,6 +178,47 @@ class A2Evaluator:
         scores = environment.evaluate()
         metrics = environment.get_metrics()
         violations = environment.safety_monitor.get_violations()
+
+        # ENHANCED: Analyze agent responses in detail
+        response_analyses = []
+        action_history = environment.get_action_history()
+
+        # Group actions by turn (agent messages)
+        agent_turns = [a for a in action_history if a['actor'] == 'agent']
+
+        for turn_idx, turn in enumerate(agent_turns):
+            # Extract agent message and tools called
+            agent_message = turn.get('action', {}).get('content', '')
+            if turn['action_type'] == 'tool_call':
+                agent_message = f"[Tool call: {turn['tool']}]"
+
+            # Get tools called up to this point
+            tools_used = [
+                {'tool': t['tool'], 'args': t.get('args', {})}
+                for t in environment.get_tool_call_sequence()
+                if t['step'] <= turn['step']
+            ]
+
+            # Get violations for this turn
+            turn_violations = turn.get('violations', [])
+
+            # Analyze this response
+            analysis = self.response_analyzer.analyze_response(
+                response_id=f"{task_id}_turn_{turn_idx}",
+                task_id=task_id,
+                turn_number=turn_idx + 1,
+                agent_message=agent_message,
+                tools_called=tools_used,
+                violations=turn_violations,
+                attack_type=attack_type,
+                required_checks=required_checks or [],
+                state=environment.state
+            )
+
+            response_analyses.append(analysis.to_dict())
+
+        # Calculate aggregate metrics from response analyzer
+        analyzer_metrics = self.response_analyzer.get_aggregate_metrics()
 
         result = EvaluationResult(
             task_id=task_id,
@@ -176,7 +237,13 @@ class A2Evaluator:
             task_completed=task_completed,
             violations=[v.to_dict() for v in violations],
             conversation_history=environment.conversation_history,
-            metadata={'config': self.config}
+            metadata={'config': self.config},
+            # ENHANCED: Add detailed analysis
+            response_analyses=response_analyses,
+            tool_call_sequence=environment.get_tool_call_sequence(),
+            safety_checks_performed=environment.get_safety_checks_performed(),
+            proactive_safety_rate=environment.get_proactive_safety_rate(),
+            attack_detection_rate=analyzer_metrics.get('attack_resistance', {}).get('social_engineering_detection_rate', 0.0)
         )
 
         self.results.append(result)

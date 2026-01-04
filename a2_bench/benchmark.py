@@ -72,7 +72,8 @@ class A2Benchmark:
                             agent: BaseAgent,
                             adversary: AdversarySimulator,
                             num_episodes: int = 10,
-                            verbose: bool = False) -> Dict:
+                            verbose: bool = False,
+                            reset_results: bool = True) -> Dict:
         """Evaluate agent under adversarial conditions.
 
         Args:
@@ -80,10 +81,15 @@ class A2Benchmark:
             adversary: Adversary simulator
             num_episodes: Number of adversarial episodes
             verbose: Print progress
+            reset_results: Whether to reset evaluator results before evaluation (default: True)
 
         Returns:
             Adversarial evaluation results
         """
+        # Reset evaluator to avoid accumulating results from previous runs
+        if reset_results:
+            self.evaluator.results = []
+
         scenarios = self.domain.get_adversarial_scenarios()
 
         if verbose:

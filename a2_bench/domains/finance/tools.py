@@ -93,6 +93,8 @@ class FinanceAgentTools:
             Transaction result
         """
         _context = _context or {}
+        state = _context.get('state', {})
+        
         account = self.db.get_account(account_id)
         if not account:
             return {
@@ -101,14 +103,16 @@ class FinanceAgentTools:
                 "message": f"Account {account_id} not found",
             }
 
-        # Check transaction risk
+        # Check transaction risk and set risk_score in state
         risk_check = self.check_transaction_risk(
             account_id, amount, transaction_type, _context
         )
+        state['risk_score'] = risk_check["risk_score"]
 
         if risk_check.get("requires_approval", False) and not risk_check.get(
             "approved", False
         ):
+            state['approved'] = False
             return {
                 "success": False,
                 "code": "APPROVAL_REQUIRED",
@@ -117,9 +121,10 @@ class FinanceAgentTools:
                 "risk_factors": risk_check["risk_factors"],
             }
 
-        # Check KYC status
+        # Check KYC status and set in state
         customer = self.db.get_customer(account.customer_id)
         kyc_check = self.db.check_kyc_status(account.customer_id)
+        state['kyc_status'] = kyc_check["status"]
 
         if not kyc_check["verified"]:
             return {
@@ -151,8 +156,17 @@ class FinanceAgentTools:
         else:  # transfer
             new_balance = account.balance - amount
 
+        # Set new_balance in state for safety monitoring
+        state['new_balance'] = new_balance
+        
+        # Update daily_total in state
+        state['daily_total'] = state.get('daily_total', 0) + amount
+        
         account.balance = new_balance
         account.last_activity = date.today()
+        
+        # Mark that transaction was logged for audit
+        state['audit_logged'] = True
 
         return {
             "success": True,
@@ -180,9 +194,18 @@ class FinanceAgentTools:
             Risk assessment result
         """
         _context = _context or {}
+        state = _context.get('state', {})
+        
         risk_assessment = self.db.check_transaction_risk(
             account_id, amount, transaction_type
         )
+
+        # Set risk_score in state for safety monitoring
+        state['risk_score'] = risk_assessment["risk_score"]
+        
+        # Set approved flag if transaction requires approval
+        if risk_assessment["requires_approval"]:
+            state['approved'] = False
 
         return {
             "risk_score": risk_assessment["risk_score"],
@@ -204,7 +227,12 @@ class FinanceAgentTools:
             KYC verification result
         """
         _context = _context or {}
+        state = _context.get('state', {})
+        
         kyc_status = self.db.check_kyc_status(customer_id)
+
+        # Set kyc_status in state for safety monitoring
+        state['kyc_status'] = "verified" if kyc_status["verified"] else "unverified"
 
         return {
             "customer_id": customer_id,
@@ -269,6 +297,8 @@ class FinanceAgentTools:
             Approval result
         """
         _context = _context or {}
+        state = _context.get('state', {})
+        
         # Check if user has approval permissions
         user = self.db.get_user(current_user)
         if not user or not self.db.has_permission(current_user, "approve_transaction"):
@@ -290,6 +320,9 @@ class FinanceAgentTools:
         transaction.approved_by = current_user
         transaction.requires_approval = False
         transaction.status = "approved"
+        
+        # Set approved flag in state for safety monitoring
+        state['approved'] = True
 
         return {
             "success": True,

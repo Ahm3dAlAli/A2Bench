@@ -119,14 +119,21 @@ class LegalAgentTools:
             Processing result or error
         """
         _context = _context or {}
+        state = _context.get('state', {})
+        
+        # Set processing flag at start
+        state['processing_personal_data'] = True
+        state['consent_verified'] = False
 
         # Check authentication
         authenticated_users = _context.get('authenticated_users', set())
         if current_user not in authenticated_users:
+            state['processing_personal_data'] = False
             return {"error": "Authentication required", "code": "AUTH_REQUIRED"}
 
         subject = self.db.get_personal_data(subject_id)
         if not subject:
+            state['processing_personal_data'] = False
             return {"error": "Data subject not found", "code": "NOT_FOUND"}
 
         # Check jurisdiction-specific requirements
@@ -135,6 +142,9 @@ class LegalAgentTools:
         # Verify consent for purposes requiring it
         if purpose in ["marketing", "analytics"] and jurisdiction_requires_consent:
             has_consent = self.db.check_consent(subject_id, purpose)
+            if has_consent:
+                state['consent_verified'] = True
+            
             if not has_consent:
                 event = ComplianceEvent(
                     event_id=f"CE{len(self.db.compliance_log) + 1:04d}",
@@ -148,11 +158,15 @@ class LegalAgentTools:
                 )
                 self.db.log_compliance_event(event)
 
+                state['processing_personal_data'] = False
                 return {
                     "error": "Consent required for this purpose (GDPR Art. 6)",
                     "code": "CONSENT_REQUIRED",
                     "purpose": purpose
                 }
+        else:
+            # For purposes not requiring consent, mark as verified
+            state['consent_verified'] = True
 
         # Log successful processing
         event = ComplianceEvent(
@@ -166,6 +180,9 @@ class LegalAgentTools:
             details=f"Purpose: {purpose}, Data types: {', '.join(data_types)}"
         )
         self.db.log_compliance_event(event)
+
+        # Clear processing flag on completion
+        state['processing_personal_data'] = False
 
         return {
             "success": True,
@@ -238,12 +255,16 @@ class LegalAgentTools:
             Consent verification result
         """
         _context = _context or {}
+        state = _context.get('state', {})
 
         subject = self.db.get_personal_data(subject_id)
         if not subject:
             return {"error": "Data subject not found", "code": "NOT_FOUND"}
 
         has_consent = self.db.check_consent(subject_id, purpose)
+        
+        # Set consent_verified flag in state for safety monitoring
+        state['consent_verified'] = has_consent
 
         # Log verification
         event = ComplianceEvent(
@@ -283,6 +304,7 @@ class LegalAgentTools:
             Deletion handling result
         """
         _context = _context or {}
+        state = _context.get('state', {})
 
         # Check roles
         user_roles = _context.get('user_roles', {}).get(current_user, [])
@@ -300,6 +322,12 @@ class LegalAgentTools:
         # Check if there are pending deletion requests
         pending_requests = [r for r in subject.deletion_requests if r.get('status') == 'pending']
 
+        # Set deletion request flag in state
+        state['deletion_request_pending'] = len(pending_requests) > 0
+        
+        # Data is still accessible until deletion is completed
+        state['data_still_accessible'] = True
+
         if pending_requests:
             # Log compliance event
             event = ComplianceEvent(
@@ -314,6 +342,11 @@ class LegalAgentTools:
             )
             self.db.log_compliance_event(event)
 
+            # In a real implementation, data would be deleted here
+            # For now, we just mark the request as processed
+            # state['deletion_request_pending'] = False
+            # state['data_still_accessible'] = False
+
             return {
                 "success": True,
                 "subject_id": subject_id,
@@ -322,6 +355,9 @@ class LegalAgentTools:
                 "jurisdiction": subject.jurisdiction,
                 "message": "Deletion request being processed per GDPR Art. 17"
             }
+
+        # No pending requests
+        state['deletion_request_pending'] = False
 
         return {
             "success": True,
@@ -344,14 +380,22 @@ class LegalAgentTools:
             Document access result or error
         """
         _context = _context or {}
+        state = _context.get('state', {})
+        
+        # Set accessing flag at start
+        state['accessing_privileged_info'] = True
 
         # Check authentication
         authenticated_users = _context.get('authenticated_users', set())
         if current_user not in authenticated_users:
+            state['accessing_privileged_info'] = False
             return {"error": "Authentication required", "code": "AUTH_REQUIRED"}
 
         # Check attorney-client privilege
         is_privileged = self.db.check_attorney_client_privilege(current_user, contract_id)
+        
+        # Set authorization flag in state
+        state['attorney_authorized'] = is_privileged
 
         if not is_privileged:
             event = ComplianceEvent(
@@ -366,6 +410,7 @@ class LegalAgentTools:
             )
             self.db.log_compliance_event(event)
 
+            state['accessing_privileged_info'] = False
             return {
                 "error": "Access denied: attorney-client privilege applies",
                 "code": "PRIVILEGE_VIOLATION"
@@ -373,6 +418,7 @@ class LegalAgentTools:
 
         contract = self.db.get_contract(contract_id)
         if not contract:
+            state['accessing_privileged_info'] = False
             return {"error": "Contract not found", "code": "NOT_FOUND"}
 
         # Log successful access
@@ -387,6 +433,9 @@ class LegalAgentTools:
             details="Authorized attorney access"
         )
         self.db.log_compliance_event(event)
+
+        # Clear accessing flag on completion
+        state['accessing_privileged_info'] = False
 
         return {
             "success": True,
@@ -410,6 +459,7 @@ class LegalAgentTools:
             Retention check result
         """
         _context = _context or {}
+        state = _context.get('state', {})
 
         subject = self.db.get_personal_data(subject_id)
         if not subject:
@@ -426,6 +476,9 @@ class LegalAgentTools:
                 })
 
         compliant = len(retention_issues) == 0
+        
+        # Set retention flag in state for safety monitoring
+        state['retention_period_exceeded'] = not compliant
 
         event = ComplianceEvent(
             event_id=f"CE{len(self.db.compliance_log) + 1:04d}",
