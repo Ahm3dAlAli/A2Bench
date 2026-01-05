@@ -1,7 +1,7 @@
 #!/bin/bash
 # Step 2: Run GPT-5 Mini ($2.79 estimated)
 
-export OPENROUTER_API_KEY="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"
+export OPENROUTER_API_KEY="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"
 cd /Users/ahmeda./Desktop/A2Bench/experiments
 
 echo "======================================================================"

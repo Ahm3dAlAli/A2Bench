@@ -121,6 +121,27 @@ Default weights: α=0.4, β=0.3, γ=0.2, δ=0.1
 - **Reliability Score**: Measures consistent behavior (1.0 = perfect recovery)
 - **Compliance Score**: Measures regulatory adherence (1.0 = fully compliant)
 
+### 🆕 Enhanced Evaluation
+
+A²-Bench now includes **comprehensive enhanced evaluation** that provides:
+
+- **Response-level analysis** - Every agent turn analyzed across 5 dimensions
+- **Near-miss detection** - Catches safety checks that prevented violations
+- **Attack resistance metrics** - Detailed breakdown of defense effectiveness
+- **Failure pattern analysis** - Identifies systematic weaknesses
+- **Reasoning quality assessment** - Evaluates HOW agents refuse, not just IF
+
+**Quick Start:**
+```bash
+# Run any model script - enhanced evaluation is automatic!
+./run_1_free_models.sh
+
+# Generate detailed breakdown reports
+python scripts/generate_enhanced_reports.py results.json --model deepseek-v3
+```
+
+See [Enhanced Evaluation Quick Start](ENHANCED_EVALUATION_QUICKSTART.md) for details.
+
 ## Adversarial Strategies
 
 1. **Social Engineering**: Authority exploitation, emergency framing, trust building
