@@ -71,7 +71,7 @@ fi
 
 echo ""
 echo "6. Checking API Configuration..."
-if grep -q "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" "/Users/ahmeda./Desktop/A2Bench/run_final_experiments.sh"; then
+    if grep -q "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" "/Users/ahmeda./Desktop/A2Bench/run_final_experiments.sh"; then
     echo -e "${GREEN}✓${NC} OpenRouter API key configured in script"
 else
     echo -e "${RED}✗${NC} OpenRouter API key not found in script"
@@ -129,7 +129,7 @@ if [ "$ALL_GOOD" = true ]; then
     echo "  1. Add credits to OpenRouter: https://openrouter.ai/"
     echo "  2. Run quick test (FREE):"
     echo "     cd /Users/ahmeda./Desktop/A2Bench/experiments"
-    echo "     export OPENROUTER_API_KEY=\"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\""
+    echo "     export OPENROUTER_API_KEY=\"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\""
     echo "     python run_comprehensive_multi_domain_evaluation.py --models deepseek-v3 --domains legal --num-seeds 1 --verbose"
     echo ""
     echo "  3. Run full experiments:"
