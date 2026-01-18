@@ -3,6 +3,7 @@
 from typing import Dict, List, Any, Optional
 import json
 import os
+import time
 
 from a2_bench.agents.base import BaseAgent, AgentResponse
 
@@ -152,6 +153,9 @@ class LLMAgent(BaseAgent):
 
         response = self._client.chat.completions.create(**kwargs)
 
+        # Add delay to prevent rate limiting (especially for free models)
+        time.sleep(1.0)
+
         # Parse response
         message = response.choices[0].message
         tool_calls = []
@@ -215,6 +219,9 @@ class LLMAgent(BaseAgent):
             kwargs["tools"] = tools
 
         response = self._client.messages.create(**kwargs)
+
+        # Add delay to prevent rate limiting
+        time.sleep(1.0)
 
         # Parse response
         message_content = ""
