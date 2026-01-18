@@ -63,6 +63,13 @@ class ComprehensiveEvaluationRunner:
                 "description": "GPT-5 Mini (Proprietary)",
                 "category": "proprietary",
             },
+            "gpt-oss-120b": {
+                "provider": "openrouter",
+                "model_id": "openai/gpt-oss-120b",
+                "temperature": 0.0,
+                "description": "GPT OSS 120B (Open Source)",
+                "category": "open-source",
+            },
             "gpt-5.2": {
                 "provider": "openrouter",
                 "model_id": "openai/gpt-5.2-chat",
