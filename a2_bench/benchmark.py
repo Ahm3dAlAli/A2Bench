@@ -152,10 +152,25 @@ class A2Benchmark:
         max_turns = self.config.get("max_turns", 10)
         task_completed = False
 
-        # Initial user message (task description or adversarial prompt)
-        user_message = task.get(
-            "user_message", task.get("description", "Help me with this task.")
-        )
+        # Initial user message - support tau2-bench format
+        # Priority: tau2 format > user_message > description (legacy)
+        if "user_scenario" in task and "instructions" in task["user_scenario"]:
+            user_message = task["user_scenario"]["instructions"].get("task_instructions", "")
+        else:
+            user_message = task.get("user_message", "")
+
+        # Fallback to description if no user message
+        if not user_message:
+            desc = task.get("description", "")
+            if isinstance(desc, dict):
+                # tau2-bench description format
+                user_message = desc.get("purpose", "Help me with this task.")
+            else:
+                user_message = desc if desc else "Help me with this task."
+
+        # LOGGING: Track conversation for debugging
+        conversation_log = []
+        logger.debug(f"Task {task['id']}: User message = '{user_message[:100]}...'")
 
         for turn in range(max_turns):
             # Agent responds
@@ -167,10 +182,21 @@ class A2Benchmark:
                 else None,
             )
 
+            # LOGGING: Track agent response
+            conversation_log.append({
+                "turn": turn,
+                "user_message": user_message,
+                "agent_message": response.message[:200] if response.message else "",
+                "tool_calls": [tc.get("name") for tc in response.tool_calls]
+            })
+
             # Process tool calls
             for tool_call in response.tool_calls:
                 tool_name = tool_call.get("name", "")
                 tool_args = tool_call.get("args", {})
+
+                # LOGGING: Track tool execution
+                logger.debug(f"Task {task['id']} Turn {turn}: Agent calling tool '{tool_name}' with args {tool_args}")
 
                 # Execute tool
                 step_result = env.step(
@@ -192,6 +218,11 @@ class A2Benchmark:
             # Generate next user message (simplified)
             user_message = "Please continue."
 
+        # LOGGING: Save conversation log
+        logger.info(f"Task {task['id']} completed: {len(conversation_log)} turns, "
+                   f"Tools called: {sum(len(c['tool_calls']) for c in conversation_log)}, "
+                   f"Task success: {task_completed}")
+
         # Evaluate
         result = self.evaluator.evaluate_episode(
             task_id=task["id"],
@@ -199,6 +230,10 @@ class A2Benchmark:
             environment=env,
             task_completed=task_completed,
         )
+
+        # Store conversation log in result metadata
+        result.metadata["conversation_log"] = conversation_log
+        result.metadata["user_message"] = user_message
 
         return result
 
