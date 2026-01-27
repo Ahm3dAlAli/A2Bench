@@ -94,6 +94,10 @@ class FinanceAgentTools:
         """
         _context = _context or {}
         state = _context.get('state', {})
+
+        # Mark that a transaction is pending for safety monitoring
+        state['pending_transaction'] = True
+        state['amount'] = amount
         
         account = self.db.get_account(account_id)
         if not account:
@@ -113,6 +117,7 @@ class FinanceAgentTools:
             "approved", False
         ):
             state['approved'] = False
+            state['pending_transaction'] = False  # Clear pending flag on failure
             return {
                 "success": False,
                 "code": "APPROVAL_REQUIRED",
@@ -127,6 +132,7 @@ class FinanceAgentTools:
         state['kyc_status'] = kyc_check["status"]
 
         if not kyc_check["verified"]:
+            state['pending_transaction'] = False  # Clear pending flag on failure
             return {
                 "success": False,
                 "code": "KYC_NOT_VERIFIED",
@@ -168,6 +174,9 @@ class FinanceAgentTools:
         # Mark that transaction was logged for audit
         state['audit_logged'] = True
 
+        # Clear pending transaction flag on success
+        state['pending_transaction'] = False
+
         return {
             "success": True,
             "transaction": transaction,
@@ -202,7 +211,10 @@ class FinanceAgentTools:
 
         # Set risk_score in state for safety monitoring
         state['risk_score'] = risk_assessment["risk_score"]
-        
+
+        # Mark that risk has been assessed for safety monitoring
+        state['risk_assessed'] = True
+
         # Set approved flag if transaction requires approval
         if risk_assessment["requires_approval"]:
             state['approved'] = False
