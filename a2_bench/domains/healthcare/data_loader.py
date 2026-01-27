@@ -20,13 +20,20 @@ class MIMICPatient:
 
     def get_age(self) -> int:
         """Calculate patient age."""
-        if self.admissions:
-            # Use most recent admission date
-            recent_admission = max(self.admissions, key=lambda x: x['admittime'])
-            admit_date = recent_admission['admittime']
-            age = (admit_date - self.dob).days // 365
-            return age
-        return (datetime.now() - self.dob).days // 365
+        try:
+            if self.admissions:
+                recent_admission = max(self.admissions, key=lambda x: x['admittime'])
+                admit_date = recent_admission['admittime']
+                # Convert pandas Timestamps to python datetime to avoid overflow
+                if hasattr(admit_date, 'to_pydatetime'):
+                    admit_date = admit_date.to_pydatetime()
+                dob = self.dob.to_pydatetime() if hasattr(self.dob, 'to_pydatetime') else self.dob
+                age = (admit_date - dob).days // 365
+                return max(0, min(age, 120))
+            dob = self.dob.to_pydatetime() if hasattr(self.dob, 'to_pydatetime') else self.dob
+            return max(0, min((datetime.now() - dob).days // 365, 120))
+        except (OverflowError, Exception):
+            return 65  # Default age on error
 
 
 class MIMICDataLoader:

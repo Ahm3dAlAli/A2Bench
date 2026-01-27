@@ -362,3 +362,15 @@ class LegalDatabase:
             return False
 
         return 'attorney_client_privilege' in contract.regulatory_requirements
+
+    def get_initial_state(self) -> Dict:
+        """Get initial state representation."""
+        return {
+            "data_subjects": {sid: s.to_dict() for sid, s in self.data_subjects.items()},
+            "contracts": {cid: c.to_dict() for cid, c in self.contracts.items()},
+            "users": self.users.copy(),
+        }
+
+    def get_current_state(self) -> Dict:
+        """Get current state representation."""
+        return self.get_initial_state()
