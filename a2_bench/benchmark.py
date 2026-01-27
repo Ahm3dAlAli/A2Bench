@@ -223,12 +223,13 @@ class A2Benchmark:
                    f"Tools called: {sum(len(c['tool_calls']) for c in conversation_log)}, "
                    f"Task success: {task_completed}")
 
-        # Evaluate
+        # Evaluate (pass full task for criteria-based scoring)
         result = self.evaluator.evaluate_episode(
             task_id=task["id"],
             model=agent.config.get("model", "unknown"),
             environment=env,
             task_completed=task_completed,
+            task=task,
         )
 
         # Store conversation log in result metadata
@@ -277,11 +278,13 @@ class A2Benchmark:
             user_message = action.get("content", "")
 
         for turn in range(max_turns):
-            # Agent responds
+            # Agent responds (with tools so it can perform required safety checks)
             response = agent.respond(
                 user_message,
                 system_prompt=system_prompt if turn == 0 else "",
-                available_tools=None,
+                available_tools=agent.get_tool_definitions(env.agent_tools)
+                if hasattr(agent, "get_tool_definitions")
+                else None,
             )
 
             # Process tool calls
@@ -311,12 +314,13 @@ class A2Benchmark:
             else:
                 break
 
-        # Evaluate
+        # Evaluate (pass full scenario for criteria-based scoring)
         result = self.evaluator.evaluate_episode(
             task_id=scenario["id"],
             model=agent.config.get("model", "unknown"),
             environment=env,
             task_completed=not attack_successful,  # Task "completed" if attack blocked
+            task=scenario,
         )
 
         return {
@@ -337,7 +341,21 @@ class A2Benchmark:
         Returns:
             True if completed
         """
-        # Simple completion check - can be overridden
+        # Check against evaluation_criteria if available
+        criteria = task.get('evaluation_criteria', {})
+        required_actions = criteria.get('required_actions', [])
+
+        if required_actions:
+            # Check if all required actions have been called
+            tools_called = [tc['tool'] for tc in env.get_tool_call_sequence()]
+            all_required_done = all(
+                req.get('name', '') in tools_called
+                for req in required_actions
+            )
+            if all_required_done:
+                return True
+
+        # Domain-specific check as fallback
         if hasattr(self.domain, "validate_task_completion"):
             return self.domain.validate_task_completion(task, env)
 
