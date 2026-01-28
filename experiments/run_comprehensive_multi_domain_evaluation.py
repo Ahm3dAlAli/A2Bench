@@ -14,6 +14,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any
 import sys
+import copy
 
 # Add parent directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -28,6 +29,34 @@ from a2_bench.adversary.strategies import AdversarialStrategy
 from a2_bench.utils.logging import setup_logging, get_logger
 
 logger = get_logger(__name__)
+
+
+def _make_serializable(obj, _seen=None):
+    """Recursively convert obj to JSON-serializable form, breaking circular refs."""
+    if _seen is None:
+        _seen = set()
+    obj_id = id(obj)
+    if obj_id in _seen:
+        return "<circular_ref>"
+    if isinstance(obj, (str, int, float, bool, type(None))):
+        return obj
+    _seen.add(obj_id)
+    try:
+        if isinstance(obj, dict):
+            return {str(k): _make_serializable(v, _seen) for k, v in obj.items()}
+        if isinstance(obj, (list, tuple)):
+            return [_make_serializable(v, _seen) for v in obj]
+        if isinstance(obj, set):
+            return [_make_serializable(v, _seen) for v in obj]
+        if isinstance(obj, (datetime, np.integer, np.floating)):
+            return str(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if hasattr(obj, 'to_dict'):
+            return _make_serializable(obj.to_dict(), _seen)
+        return str(obj)
+    finally:
+        _seen.discard(obj_id)
 
 
 class ComprehensiveEvaluationRunner:
@@ -122,14 +151,14 @@ class ComprehensiveEvaluationRunner:
             },
             "deepseek-v3": {
                 "provider": "openrouter",
-                "model_id": "nex-agi/deepseek-v3.1-nex-n1:free",
+                "model_id": "nex-agi/deepseek-v3.1-nex-n1",
                 "temperature": 0.0,
                 "description": "DeepSeek V3.1 Nex N1 (Open-Source, Free)",
                 "category": "open-source",
             },
             "xiaomi-mimo-v2": {
                 "provider": "openrouter",
-                "model_id": "xiaomi/mimo-v2-flash:free",
+                "model_id": "xiaomi/mimo-v2-flash",
                 "temperature": 0.0,
                 "description": "Xiaomi Mimo v2 Flash (Open-Source, Free)",
                 "category": "open-source",
@@ -144,7 +173,7 @@ class ComprehensiveEvaluationRunner:
             # ===== AGENTIC MODELS (Specialized for Agent Tasks) =====
             "devstral-2512": {
                 "provider": "openrouter",
-                "model_id": "mistralai/devstral-2512:free",
+                "model_id": "mistralai/devstral-2512",
                 "temperature": 0.0,
                 "description": "Devstral 2 2512 - 123B agentic coding model (Free)",
                 "category": "agentic",
@@ -153,7 +182,7 @@ class ComprehensiveEvaluationRunner:
             },
             "kat-coder-pro": {
                 "provider": "openrouter",
-                "model_id": "kwaipilot/kat-coder-pro-v1:free",
+                "model_id": "kwaipilot/kat-coder-pro",
                 "temperature": 0.0,
                 "description": "KAT-Coder-Pro V1 - Agentic coding (73.4% SWE-Bench) (Free)",
                 "category": "agentic",
@@ -488,7 +517,7 @@ class ComprehensiveEvaluationRunner:
                 self.output_dir / f"comprehensive_results_{self.timestamp}.json"
             )
             with open(output_file, "w") as f:
-                json.dump(results, f, indent=2, default=str)
+                json.dump(_make_serializable(results), f, indent=2, default=str)
             logger.info(
                 f"💾 Saved progress: {model_name} complete → {output_file.name}"
             )
@@ -496,7 +525,7 @@ class ComprehensiveEvaluationRunner:
         # Save final results
         output_file = self.output_dir / f"comprehensive_results_{self.timestamp}.json"
         with open(output_file, "w") as f:
-            json.dump(results, f, indent=2, default=str)
+            json.dump(_make_serializable(results), f, indent=2, default=str)
 
         logger.info(f"\n{'=' * 80}")
         logger.info(f"EVALUATION COMPLETE")
