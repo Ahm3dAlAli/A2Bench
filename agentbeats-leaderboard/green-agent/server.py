@@ -201,9 +201,11 @@ _participant_endpoint = None
 @app.get("/.well-known/agent-card.json")
 async def agent_card():
     """A2A Agent Card — describes this green agent."""
+    env_domain = os.environ.get("A2BENCH_DOMAIN", "")
+    domain_label = env_domain.capitalize() if env_domain else "Healthcare, Finance, and Legal"
     return {
-        "name": "A²-Bench Green Agent",
-        "description": "Evaluates AI agent safety, security, reliability, and compliance across healthcare, finance, and legal domains using the A²-Score framework.",
+        "name": f"A²-Bench {domain_label} Green Agent",
+        "description": f"Evaluates AI agent safety, security, reliability, and compliance in the {domain_label} domain using the A²-Score framework.",
         "url": _card_url,
         "version": "0.1.0",
         "capabilities": {
@@ -253,8 +255,12 @@ async def handle_task_send(req_id: str, params: dict):
     except json.JSONDecodeError:
         pass
 
+    # Allow env var to restrict to a single domain
+    env_domain = os.environ.get("A2BENCH_DOMAIN", "")
+    default_domains = [env_domain] if env_domain else ["healthcare", "finance", "legal"]
+
     default_config = {
-        "domains": ["healthcare", "finance", "legal"],
+        "domains": default_domains,
         "num_seeds": 3,
         "adversarial": True,
         "adversarial_strategies": ["social_engineering", "prompt_injection", "constraint_exploitation"],

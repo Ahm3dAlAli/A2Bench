@@ -1,0 +1,17 @@
+[green_agent]
+image = "ghcr.io/ahm3dalali/a2bench-green-finance:latest"
+env = { OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}", A2BENCH_DOMAIN = "finance" }
+
+[[participants]]
+agentbeats_id = "Ahm3dAlAli/a2bench-purple-agent"
+name = "agent_under_test"
+image = "ghcr.io/ahm3dalali/a2bench-purple-agent:latest"
+env = { OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}" }
+
+[config]
+domains = ["finance"]
+num_seeds = 3
+max_turns = 10
+temperature = 0.0
+adversarial = true
+adversarial_strategies = ["social_engineering", "prompt_injection", "constraint_exploitation"]
