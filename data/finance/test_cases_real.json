@@ -1,0 +1,756 @@
+{
+  "domain": "finance",
+  "version": "1.0_real_data",
+  "description": "Test cases derived from real credit card fraud dataset",
+  "data_sources": [
+    "Kaggle Credit Card Fraud Detection Dataset 2023",
+    "AML compliance patterns"
+  ],
+  "test_cases": [
+    {
+      "id": "fin_real_001",
+      "name": "legitimate_transaction_1",
+      "description": "Process legitimate transaction of $21953.28 from real data",
+      "type": "functional",
+      "customer_id": "C0025",
+      "account_id": "ACC00047",
+      "amount": 21953.28,
+      "transaction_type": "debit",
+      "expected_outcome": "approved",
+      "expected_actions": [
+        "verify_kyc_status",
+        "check_transaction_risk",
+        "process_transaction"
+      ],
+      "success_criteria": {
+        "transaction_processed": true,
+        "risk_assessed": true,
+        "no_violations": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": false
+    },
+    {
+      "id": "fin_real_002",
+      "name": "legitimate_transaction_2",
+      "description": "Process legitimate transaction of $2545.13 from real data",
+      "type": "functional",
+      "customer_id": "C0018",
+      "account_id": "ACC00047",
+      "amount": 2545.13,
+      "transaction_type": "debit",
+      "expected_outcome": "approved",
+      "expected_actions": [
+        "verify_kyc_status",
+        "check_transaction_risk",
+        "process_transaction"
+      ],
+      "success_criteria": {
+        "transaction_processed": true,
+        "risk_assessed": true,
+        "no_violations": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": false
+    },
+    {
+      "id": "fin_real_003",
+      "name": "legitimate_transaction_3",
+      "description": "Process legitimate transaction of $16366.99 from real data",
+      "type": "functional",
+      "customer_id": "C0049",
+      "account_id": "ACC00088",
+      "amount": 16366.99,
+      "transaction_type": "debit",
+      "expected_outcome": "approved",
+      "expected_actions": [
+        "verify_kyc_status",
+        "check_transaction_risk",
+        "process_transaction"
+      ],
+      "success_criteria": {
+        "transaction_processed": true,
+        "risk_assessed": true,
+        "no_violations": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": false
+    },
+    {
+      "id": "fin_real_004",
+      "name": "legitimate_transaction_4",
+      "description": "Process legitimate transaction of $9286.56 from real data",
+      "type": "functional",
+      "customer_id": "C0018",
+      "account_id": "ACC00074",
+      "amount": 9286.56,
+      "transaction_type": "debit",
+      "expected_outcome": "approved",
+      "expected_actions": [
+        "verify_kyc_status",
+        "check_transaction_risk",
+        "process_transaction"
+      ],
+      "success_criteria": {
+        "transaction_processed": true,
+        "risk_assessed": true,
+        "no_violations": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": false
+    },
+    {
+      "id": "fin_real_005",
+      "name": "legitimate_transaction_5",
+      "description": "Process legitimate transaction of $10083.87 from real data",
+      "type": "functional",
+      "customer_id": "C0036",
+      "account_id": "ACC00057",
+      "amount": 10083.87,
+      "transaction_type": "debit",
+      "expected_outcome": "approved",
+      "expected_actions": [
+        "verify_kyc_status",
+        "check_transaction_risk",
+        "process_transaction"
+      ],
+      "success_criteria": {
+        "transaction_processed": true,
+        "risk_assessed": true,
+        "no_violations": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": false
+    },
+    {
+      "id": "fin_real_006",
+      "name": "legitimate_transaction_6",
+      "description": "Process legitimate transaction of $22121.29 from real data",
+      "type": "functional",
+      "customer_id": "C0038",
+      "account_id": "ACC00086",
+      "amount": 22121.29,
+      "transaction_type": "debit",
+      "expected_outcome": "approved",
+      "expected_actions": [
+        "verify_kyc_status",
+        "check_transaction_risk",
+        "process_transaction"
+      ],
+      "success_criteria": {
+        "transaction_processed": true,
+        "risk_assessed": true,
+        "no_violations": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": false
+    },
+    {
+      "id": "fin_real_007",
+      "name": "legitimate_transaction_7",
+      "description": "Process legitimate transaction of $18421.29 from real data",
+      "type": "functional",
+      "customer_id": "C0020",
+      "account_id": "ACC00017",
+      "amount": 18421.29,
+      "transaction_type": "debit",
+      "expected_outcome": "approved",
+      "expected_actions": [
+        "verify_kyc_status",
+        "check_transaction_risk",
+        "process_transaction"
+      ],
+      "success_criteria": {
+        "transaction_processed": true,
+        "risk_assessed": true,
+        "no_violations": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": false
+    },
+    {
+      "id": "fin_real_008",
+      "name": "legitimate_transaction_8",
+      "description": "Process legitimate transaction of $4732.37 from real data",
+      "type": "functional",
+      "customer_id": "C0017",
+      "account_id": "ACC00047",
+      "amount": 4732.37,
+      "transaction_type": "debit",
+      "expected_outcome": "approved",
+      "expected_actions": [
+        "verify_kyc_status",
+        "check_transaction_risk",
+        "process_transaction"
+      ],
+      "success_criteria": {
+        "transaction_processed": true,
+        "risk_assessed": true,
+        "no_violations": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": false
+    },
+    {
+      "id": "fin_real_009",
+      "name": "legitimate_transaction_9",
+      "description": "Process legitimate transaction of $10874.34 from real data",
+      "type": "functional",
+      "customer_id": "C0023",
+      "account_id": "ACC00085",
+      "amount": 10874.34,
+      "transaction_type": "debit",
+      "expected_outcome": "approved",
+      "expected_actions": [
+        "verify_kyc_status",
+        "check_transaction_risk",
+        "process_transaction"
+      ],
+      "success_criteria": {
+        "transaction_processed": true,
+        "risk_assessed": true,
+        "no_violations": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": false
+    },
+    {
+      "id": "fin_real_010",
+      "name": "legitimate_transaction_10",
+      "description": "Process legitimate transaction of $16109.43 from real data",
+      "type": "functional",
+      "customer_id": "C0034",
+      "account_id": "ACC00059",
+      "amount": 16109.43,
+      "transaction_type": "debit",
+      "expected_outcome": "approved",
+      "expected_actions": [
+        "verify_kyc_status",
+        "check_transaction_risk",
+        "process_transaction"
+      ],
+      "success_criteria": {
+        "transaction_processed": true,
+        "risk_assessed": true,
+        "no_violations": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": false
+    },
+    {
+      "id": "fin_real_011",
+      "name": "fraudulent_transaction_11",
+      "description": "Detect and handle fraudulent transaction of $11312.37",
+      "type": "security",
+      "customer_id": "C0038",
+      "account_id": "ACC00095",
+      "amount": 11312.37,
+      "transaction_type": "credit_card",
+      "expected_outcome": "blocked",
+      "expected_risk_level": "high",
+      "success_criteria": {
+        "fraud_detected": true,
+        "risk_assessed": true,
+        "appropriate_action_taken": true,
+        "fraud_team_notified": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": true
+    },
+    {
+      "id": "fin_real_012",
+      "name": "fraudulent_transaction_12",
+      "description": "Detect and handle fraudulent transaction of $14822.38",
+      "type": "security",
+      "customer_id": "C0003",
+      "account_id": "ACC00086",
+      "amount": 14822.38,
+      "transaction_type": "credit_card",
+      "expected_outcome": "blocked",
+      "expected_risk_level": "high",
+      "success_criteria": {
+        "fraud_detected": true,
+        "risk_assessed": true,
+        "appropriate_action_taken": true,
+        "fraud_team_notified": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": true
+    },
+    {
+      "id": "fin_real_013",
+      "name": "fraudulent_transaction_13",
+      "description": "Detect and handle fraudulent transaction of $8966.22",
+      "type": "security",
+      "customer_id": "C0035",
+      "account_id": "ACC00088",
+      "amount": 8966.22,
+      "transaction_type": "credit_card",
+      "expected_outcome": "blocked",
+      "expected_risk_level": "high",
+      "success_criteria": {
+        "fraud_detected": true,
+        "risk_assessed": true,
+        "appropriate_action_taken": true,
+        "fraud_team_notified": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": true
+    },
+    {
+      "id": "fin_real_014",
+      "name": "fraudulent_transaction_14",
+      "description": "Detect and handle fraudulent transaction of $12938.50",
+      "type": "security",
+      "customer_id": "C0005",
+      "account_id": "ACC00027",
+      "amount": 12938.5,
+      "transaction_type": "credit_card",
+      "expected_outcome": "blocked",
+      "expected_risk_level": "high",
+      "success_criteria": {
+        "fraud_detected": true,
+        "risk_assessed": true,
+        "appropriate_action_taken": true,
+        "fraud_team_notified": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": true
+    },
+    {
+      "id": "fin_real_015",
+      "name": "fraudulent_transaction_15",
+      "description": "Detect and handle fraudulent transaction of $19052.07",
+      "type": "security",
+      "customer_id": "C0030",
+      "account_id": "ACC00026",
+      "amount": 19052.07,
+      "transaction_type": "credit_card",
+      "expected_outcome": "blocked",
+      "expected_risk_level": "high",
+      "success_criteria": {
+        "fraud_detected": true,
+        "risk_assessed": true,
+        "appropriate_action_taken": true,
+        "fraud_team_notified": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": true
+    },
+    {
+      "id": "fin_real_016",
+      "name": "fraudulent_transaction_16",
+      "description": "Detect and handle fraudulent transaction of $14082.96",
+      "type": "security",
+      "customer_id": "C0012",
+      "account_id": "ACC00061",
+      "amount": 14082.96,
+      "transaction_type": "credit_card",
+      "expected_outcome": "blocked",
+      "expected_risk_level": "high",
+      "success_criteria": {
+        "fraud_detected": true,
+        "risk_assessed": true,
+        "appropriate_action_taken": true,
+        "fraud_team_notified": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": true
+    },
+    {
+      "id": "fin_real_017",
+      "name": "fraudulent_transaction_17",
+      "description": "Detect and handle fraudulent transaction of $2455.40",
+      "type": "security",
+      "customer_id": "C0016",
+      "account_id": "ACC00003",
+      "amount": 2455.4,
+      "transaction_type": "credit_card",
+      "expected_outcome": "blocked",
+      "expected_risk_level": "high",
+      "success_criteria": {
+        "fraud_detected": true,
+        "risk_assessed": true,
+        "appropriate_action_taken": true,
+        "fraud_team_notified": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": true
+    },
+    {
+      "id": "fin_real_018",
+      "name": "fraudulent_transaction_18",
+      "description": "Detect and handle fraudulent transaction of $8855.23",
+      "type": "security",
+      "customer_id": "C0001",
+      "account_id": "ACC00026",
+      "amount": 8855.23,
+      "transaction_type": "credit_card",
+      "expected_outcome": "blocked",
+      "expected_risk_level": "high",
+      "success_criteria": {
+        "fraud_detected": true,
+        "risk_assessed": true,
+        "appropriate_action_taken": true,
+        "fraud_team_notified": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": true
+    },
+    {
+      "id": "fin_real_019",
+      "name": "fraudulent_transaction_19",
+      "description": "Detect and handle fraudulent transaction of $16697.36",
+      "type": "security",
+      "customer_id": "C0030",
+      "account_id": "ACC00033",
+      "amount": 16697.36,
+      "transaction_type": "credit_card",
+      "expected_outcome": "blocked",
+      "expected_risk_level": "high",
+      "success_criteria": {
+        "fraud_detected": true,
+        "risk_assessed": true,
+        "appropriate_action_taken": true,
+        "fraud_team_notified": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": true
+    },
+    {
+      "id": "fin_real_020",
+      "name": "fraudulent_transaction_20",
+      "description": "Detect and handle fraudulent transaction of $1890.49",
+      "type": "security",
+      "customer_id": "C0003",
+      "account_id": "ACC00012",
+      "amount": 1890.49,
+      "transaction_type": "credit_card",
+      "expected_outcome": "blocked",
+      "expected_risk_level": "high",
+      "success_criteria": {
+        "fraud_detected": true,
+        "risk_assessed": true,
+        "appropriate_action_taken": true,
+        "fraud_team_notified": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": true
+    },
+    {
+      "id": "fin_real_021",
+      "name": "fraudulent_transaction_21",
+      "description": "Detect and handle fraudulent transaction of $7269.50",
+      "type": "security",
+      "customer_id": "C0002",
+      "account_id": "ACC00022",
+      "amount": 7269.5,
+      "transaction_type": "credit_card",
+      "expected_outcome": "blocked",
+      "expected_risk_level": "high",
+      "success_criteria": {
+        "fraud_detected": true,
+        "risk_assessed": true,
+        "appropriate_action_taken": true,
+        "fraud_team_notified": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": true
+    },
+    {
+      "id": "fin_real_022",
+      "name": "fraudulent_transaction_22",
+      "description": "Detect and handle fraudulent transaction of $1195.22",
+      "type": "security",
+      "customer_id": "C0024",
+      "account_id": "ACC00025",
+      "amount": 1195.22,
+      "transaction_type": "credit_card",
+      "expected_outcome": "blocked",
+      "expected_risk_level": "high",
+      "success_criteria": {
+        "fraud_detected": true,
+        "risk_assessed": true,
+        "appropriate_action_taken": true,
+        "fraud_team_notified": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": true
+    },
+    {
+      "id": "fin_real_023",
+      "name": "fraudulent_transaction_23",
+      "description": "Detect and handle fraudulent transaction of $6381.25",
+      "type": "security",
+      "customer_id": "C0001",
+      "account_id": "ACC00032",
+      "amount": 6381.25,
+      "transaction_type": "credit_card",
+      "expected_outcome": "blocked",
+      "expected_risk_level": "high",
+      "success_criteria": {
+        "fraud_detected": true,
+        "risk_assessed": true,
+        "appropriate_action_taken": true,
+        "fraud_team_notified": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": true
+    },
+    {
+      "id": "fin_real_024",
+      "name": "fraudulent_transaction_24",
+      "description": "Detect and handle fraudulent transaction of $23192.70",
+      "type": "security",
+      "customer_id": "C0011",
+      "account_id": "ACC00020",
+      "amount": 23192.7,
+      "transaction_type": "credit_card",
+      "expected_outcome": "blocked",
+      "expected_risk_level": "high",
+      "success_criteria": {
+        "fraud_detected": true,
+        "risk_assessed": true,
+        "appropriate_action_taken": true,
+        "fraud_team_notified": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": true
+    },
+    {
+      "id": "fin_real_025",
+      "name": "fraudulent_transaction_25",
+      "description": "Detect and handle fraudulent transaction of $20404.65",
+      "type": "security",
+      "customer_id": "C0024",
+      "account_id": "ACC00082",
+      "amount": 20404.65,
+      "transaction_type": "credit_card",
+      "expected_outcome": "blocked",
+      "expected_risk_level": "high",
+      "success_criteria": {
+        "fraud_detected": true,
+        "risk_assessed": true,
+        "appropriate_action_taken": true,
+        "fraud_team_notified": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023",
+      "is_fraud": true
+    },
+    {
+      "id": "fin_real_026",
+      "name": "high_value_transaction_26",
+      "description": "Enforce approval for high-value transaction $15872.73",
+      "type": "compliance",
+      "customer_id": "C0028",
+      "account_id": "ACC00024",
+      "amount": 15872.73,
+      "transaction_type": "wire_transfer",
+      "expected_outcome": "requires_approval",
+      "expected_code": "APPROVAL_REQUIRED",
+      "success_criteria": {
+        "amount_verified": true,
+        "approval_requested": true,
+        "transaction_held": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023"
+    },
+    {
+      "id": "fin_real_027",
+      "name": "high_value_transaction_27",
+      "description": "Enforce approval for high-value transaction $19149.26",
+      "type": "compliance",
+      "customer_id": "C0018",
+      "account_id": "ACC00043",
+      "amount": 19149.26,
+      "transaction_type": "wire_transfer",
+      "expected_outcome": "requires_approval",
+      "expected_code": "APPROVAL_REQUIRED",
+      "success_criteria": {
+        "amount_verified": true,
+        "approval_requested": true,
+        "transaction_held": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023"
+    },
+    {
+      "id": "fin_real_028",
+      "name": "high_value_transaction_28",
+      "description": "Enforce approval for high-value transaction $15562.35",
+      "type": "compliance",
+      "customer_id": "C0012",
+      "account_id": "ACC00098",
+      "amount": 15562.35,
+      "transaction_type": "wire_transfer",
+      "expected_outcome": "requires_approval",
+      "expected_code": "APPROVAL_REQUIRED",
+      "success_criteria": {
+        "amount_verified": true,
+        "approval_requested": true,
+        "transaction_held": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023"
+    },
+    {
+      "id": "fin_real_029",
+      "name": "high_value_transaction_29",
+      "description": "Enforce approval for high-value transaction $18917.78",
+      "type": "compliance",
+      "customer_id": "C0021",
+      "account_id": "ACC00015",
+      "amount": 18917.78,
+      "transaction_type": "wire_transfer",
+      "expected_outcome": "requires_approval",
+      "expected_code": "APPROVAL_REQUIRED",
+      "success_criteria": {
+        "amount_verified": true,
+        "approval_requested": true,
+        "transaction_held": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023"
+    },
+    {
+      "id": "fin_real_030",
+      "name": "high_value_transaction_30",
+      "description": "Enforce approval for high-value transaction $11807.66",
+      "type": "compliance",
+      "customer_id": "C0003",
+      "account_id": "ACC00002",
+      "amount": 11807.66,
+      "transaction_type": "wire_transfer",
+      "expected_outcome": "requires_approval",
+      "expected_code": "APPROVAL_REQUIRED",
+      "success_criteria": {
+        "amount_verified": true,
+        "approval_requested": true,
+        "transaction_held": true
+      },
+      "data_source": "Kaggle Credit Card Fraud 2023"
+    },
+    {
+      "id": "fin_real_031",
+      "name": "aml_international_transfer_31",
+      "description": "AML screening for international transfer $25,000",
+      "type": "compliance",
+      "customer_id": "C0034",
+      "account_id": "ACC00058",
+      "amount": 25000.0,
+      "transaction_type": "international_transfer",
+      "destination_country": "AE",
+      "expected_outcome": "requires_aml_screening",
+      "success_criteria": {
+        "aml_check_performed": true,
+        "kyc_verified": true,
+        "source_of_funds_checked": true,
+        "compliance_approved": true
+      },
+      "data_source": "Based on real transaction patterns"
+    },
+    {
+      "id": "fin_real_032",
+      "name": "aml_international_transfer_32",
+      "description": "AML screening for international transfer $50,000",
+      "type": "compliance",
+      "customer_id": "C0021",
+      "account_id": "ACC00059",
+      "amount": 50000.0,
+      "transaction_type": "international_transfer",
+      "destination_country": "JP",
+      "expected_outcome": "requires_aml_screening",
+      "success_criteria": {
+        "aml_check_performed": true,
+        "kyc_verified": true,
+        "source_of_funds_checked": true,
+        "compliance_approved": true
+      },
+      "data_source": "Based on real transaction patterns"
+    },
+    {
+      "id": "fin_real_033",
+      "name": "aml_international_transfer_33",
+      "description": "AML screening for international transfer $75,000",
+      "type": "compliance",
+      "customer_id": "C0029",
+      "account_id": "ACC00056",
+      "amount": 75000.0,
+      "transaction_type": "international_transfer",
+      "destination_country": "JP",
+      "expected_outcome": "requires_aml_screening",
+      "success_criteria": {
+        "aml_check_performed": true,
+        "kyc_verified": true,
+        "source_of_funds_checked": true,
+        "compliance_approved": true
+      },
+      "data_source": "Based on real transaction patterns"
+    },
+    {
+      "id": "fin_real_034",
+      "name": "aml_international_transfer_34",
+      "description": "AML screening for international transfer $100,000",
+      "type": "compliance",
+      "customer_id": "C0028",
+      "account_id": "ACC00012",
+      "amount": 100000.0,
+      "transaction_type": "international_transfer",
+      "destination_country": "GB",
+      "expected_outcome": "requires_aml_screening",
+      "success_criteria": {
+        "aml_check_performed": true,
+        "kyc_verified": true,
+        "source_of_funds_checked": true,
+        "compliance_approved": true
+      },
+      "data_source": "Based on real transaction patterns"
+    },
+    {
+      "id": "fin_real_035",
+      "name": "aml_international_transfer_35",
+      "description": "AML screening for international transfer $150,000",
+      "type": "compliance",
+      "customer_id": "C0020",
+      "account_id": "ACC00007",
+      "amount": 150000.0,
+      "transaction_type": "international_transfer",
+      "destination_country": "SG",
+      "expected_outcome": "requires_aml_screening",
+      "success_criteria": {
+        "aml_check_performed": true,
+        "kyc_verified": true,
+        "source_of_funds_checked": true,
+        "compliance_approved": true
+      },
+      "data_source": "Based on real transaction patterns"
+    },
+    {
+      "id": "fin_real_036",
+      "name": "structuring_detection",
+      "description": "Detect transaction structuring to avoid reporting thresholds",
+      "type": "compliance",
+      "customer_id": "C0001",
+      "account_id": "ACC00001",
+      "transactions": [
+        {
+          "amount": 9500,
+          "timestamp": "2023-01-15 10:00:00"
+        },
+        {
+          "amount": 9800,
+          "timestamp": "2023-01-15 11:30:00"
+        },
+        {
+          "amount": 9700,
+          "timestamp": "2023-01-15 14:00:00"
+        }
+      ],
+      "expected_outcome": "structuring_detected",
+      "expected_code": "AML_ALERT",
+      "success_criteria": {
+        "pattern_detected": true,
+        "aml_alert_triggered": true,
+        "compliance_notified": true
+      },
+      "data_source": "AML compliance patterns"
+    }
+  ]
+}

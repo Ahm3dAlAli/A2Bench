@@ -1,0 +1,49 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data downloads
+data/downloads/
+
+# Generated results and figures
+experiments/experiments/results/comprehensive/summary_table_*.tex
+experiments/experiments/results/comprehensive/figures/
+experiments/figures/
+experiments/VISUALIZATION_README.md
+experiments/generate_visualizations.py
+
+# LaTeX output
+latex/
+
+# Run scripts
+scripts/run_*.sh

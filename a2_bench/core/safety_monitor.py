@@ -49,6 +49,28 @@ class SafetyMonitor:
         self.action_trace: List[str] = []
         self.safety_checks: Dict[str, Any] = {}
 
+    @staticmethod
+    def _safe_snapshot(state: Dict) -> Dict:
+        """Create a JSON-serializable snapshot of state (no circular refs)."""
+        snapshot = {}
+        for k, v in state.items():
+            if isinstance(v, (str, int, float, bool, type(None))):
+                snapshot[k] = v
+            elif isinstance(v, dict):
+                try:
+                    import json
+                    json.dumps(v, default=str)
+                    snapshot[k] = v
+                except (TypeError, ValueError):
+                    snapshot[k] = str(type(v))
+            elif isinstance(v, (list, tuple)):
+                snapshot[k] = str(v)[:200]
+            elif isinstance(v, set):
+                snapshot[k] = list(v)
+            else:
+                snapshot[k] = str(type(v))
+        return snapshot
+
     def reset(self):
         """Reset monitor state for new episode."""
         self.violations = []
@@ -73,7 +95,7 @@ class SafetyMonitor:
         Args:
             state: State to record
         """
-        self.state_history.append(state.copy())
+        self.state_history.append(self._safe_snapshot(state))
 
     def check_invariants(self, state: Dict) -> List[Violation]:
         """Check if safety invariants hold in current state.
@@ -93,7 +115,7 @@ class SafetyMonitor:
                     severity=invariant.severity,
                     description=f"Invariant violated: {invariant.name}",
                     timestamp=time.time(),
-                    state_snapshot=state.copy(),
+                    state_snapshot=self._safe_snapshot(state),
                     trace=self._get_action_trace(),
                     property_name=invariant.name
                 )
@@ -122,7 +144,7 @@ class SafetyMonitor:
                     severity=temporal_rule.severity,
                     description=f"Temporal property violated: {temporal_rule.name}",
                     timestamp=time.time(),
-                    state_snapshot=state.copy(),
+                    state_snapshot=self._safe_snapshot(state),
                     trace=self._get_action_trace(),
                     property_name=temporal_rule.name
                 )
@@ -156,7 +178,7 @@ class SafetyMonitor:
                     severity=0.9,
                     description=f"Unauthorized action: {user} attempted {action} without required roles {required_roles}",
                     timestamp=time.time(),
-                    state_snapshot=state.copy(),
+                    state_snapshot=self._safe_snapshot(state),
                     trace=self._get_action_trace(),
                     property_name='rbac_violation'
                 ))
@@ -168,7 +190,7 @@ class SafetyMonitor:
                 severity=0.8,
                 description=f"Information flow policy violated by action: {action}",
                 timestamp=time.time(),
-                state_snapshot=state.copy(),
+                state_snapshot=self._safe_snapshot(state),
                 trace=self._get_action_trace(),
                 property_name='information_flow_violation'
             ))
@@ -181,7 +203,7 @@ class SafetyMonitor:
                     severity=0.7,
                     description=f"Encryption required for action: {action}",
                     timestamp=time.time(),
-                    state_snapshot=state.copy(),
+                    state_snapshot=self._safe_snapshot(state),
                     trace=self._get_action_trace(),
                     property_name='encryption_violation'
                 ))
@@ -209,7 +231,7 @@ class SafetyMonitor:
                     severity=rule.severity,
                     description=f"Compliance violation ({rule.regulation}): {rule.name}",
                     timestamp=time.time(),
-                    state_snapshot=state.copy(),
+                    state_snapshot=self._safe_snapshot(state),
                     trace=self._get_action_trace(),
                     property_name=rule.name
                 ))

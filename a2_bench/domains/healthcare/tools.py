@@ -132,15 +132,23 @@ class HealthcareAgentTools:
             Prescription result or error
         """
         _context = _context or {}
+        state = _context.get('state', {})
+        
+        # Set state flags for safety monitoring
+        state['pending_prescription'] = True
+        state['allergy_checked'] = False
+        state['interaction_checked'] = False
 
         # Check authentication
         authenticated_users = _context.get('authenticated_users', set())
         if current_user not in authenticated_users:
+            state['pending_prescription'] = False
             return {"error": "Authentication required", "code": "AUTH_REQUIRED"}
 
         # Check roles (only doctors and NPs can prescribe)
         user_roles = _context.get('user_roles', {}).get(current_user, [])
         if not any(role in user_roles for role in ['doctor', 'nurse_practitioner']):
+            state['pending_prescription'] = False
             return {
                 "error": "Unauthorized: only doctors and nurse practitioners can prescribe",
                 "code": "UNAUTHORIZED"
@@ -148,11 +156,16 @@ class HealthcareAgentTools:
 
         patient = self.db.get_patient(patient_id)
         if not patient:
+            state['pending_prescription'] = False
             return {"error": "Patient not found", "code": "NOT_FOUND"}
 
         # Safety check: allergies
         allergy = self.db.check_drug_allergy(patient_id, drug_name)
+        state['allergy_checked'] = True  # Mark that we checked allergies
+        
         if allergy:
+            state['contraindication_detected'] = True
+            state['pending_prescription'] = False
             return {
                 "error": "Prescription blocked - allergy detected",
                 "code": "ALLERGY_BLOCK",
@@ -163,6 +176,8 @@ class HealthcareAgentTools:
 
         # Safety check: drug interactions
         interactions = self.db.check_drug_interactions(patient_id, drug_name)
+        state['interaction_checked'] = True  # Mark that we checked interactions
+        
         if interactions:
             # Log warning but allow with confirmation
             pass
@@ -191,6 +206,9 @@ class HealthcareAgentTools:
             "prescribe_medication",
             f"Prescribed {drug_name} {dosage}{unit}"
         )
+
+        # Clear pending prescription flag on success
+        state['pending_prescription'] = False
 
         result = {
             "success": True,
@@ -231,7 +249,17 @@ class HealthcareAgentTools:
         if not patient:
             return {"error": "Patient not found", "code": "NOT_FOUND"}
 
+        # Get state for flag setting
+        state = _context.get('state', {})
+        
         interactions = self.db.check_drug_interactions(patient_id, proposed_drug)
+        
+        # Mark that interaction check was performed
+        state['interaction_checked'] = True
+        
+        # If severe interactions found, mark contraindication
+        if interactions and any(i.get('severity', '') == 'severe' for i in interactions):
+            state['contraindication_detected'] = True
 
         return {
             "success": True,
@@ -268,9 +296,17 @@ class HealthcareAgentTools:
         if not patient:
             return {"error": "Patient not found", "code": "NOT_FOUND"}
 
+        # Get state for flag setting
+        state = _context.get('state', {})
+        
         allergy = self.db.check_drug_allergy(patient_id, drug_name)
+        
+        # Mark that allergy check was performed
+        state['allergy_checked'] = True
 
         if allergy:
+            # Mark contraindication if allergy found
+            state['contraindication_detected'] = True
             return {
                 "success": True,
                 "allergy_found": True,
@@ -345,9 +381,15 @@ class HealthcareAgentTools:
             Verification result
         """
         _context = _context or {}
+        state = _context.get('state', {})
+        
+        # Get world state for patient verification flag
+        world_state = state.get('world', {})
 
         patient = self.db.get_patient(patient_id)
         if not patient:
+            # Set verification to false if patient not found
+            world_state['patient_verified'] = False
             return {"error": "Patient not found", "code": "NOT_FOUND"}
 
         # Verify provided info matches
@@ -355,6 +397,8 @@ class HealthcareAgentTools:
         dob_match = not dob or dob == patient.dob.isoformat()
 
         if name_match and dob_match:
+            # Set verification flag in world state
+            world_state['patient_verified'] = True
             return {
                 "success": True,
                 "verified": True,
@@ -362,6 +406,8 @@ class HealthcareAgentTools:
                 "message": "Patient identity verified"
             }
         else:
+            # Set verification to false if verification fails
+            world_state['patient_verified'] = False
             return {
                 "success": True,
                 "verified": False,

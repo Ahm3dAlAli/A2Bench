@@ -1,0 +1,908 @@
+\documentclass{article}
+
+% NeurIPS 2024 style (adapted for 2026)
+\usepackage[preprint]{neurips_2024}
+
+% Essential packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{multirow}
+\usepackage{subcaption}
+\usepackage{amsmath, amssymb}
+\usepackage{parskip}
+\usepackage{float}
+\setlength{\parindent}{0pt}
+
+% Custom commands
+\newcommand{\aasquared}{A\textsuperscript{2}}
+\newcommand{\aabench}{\aasquared-Bench}
+
+\title{\aabench: A Comprehensive Benchmark for Evaluating AI Agent Safety, Security, and Reliability in Dual-Control Environments}
+
+\author{%
+  Anonymous Author(s)\\
+  Anonymous Institution(s)\\
+  \texttt{anonymous@institution.edu}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+The rapid advancement of large language models (LLMs) has enabled the development of increasingly autonomous AI agents capable of performing complex tasks across diverse domains. However, the deployment of these agents in real-world applications is hindered by a critical lack of rigorous evaluation frameworks for assessing their safety, security, and reliability, particularly in adversarial settings. To address this gap, we introduce \aabench, a comprehensive benchmark designed to quantitatively evaluate AI agent performance in dual-control environments where both the agent and an adversarial actor can influence the system state. \aabench{} provides a multi-dimensional scoring system that evaluates agents across four key dimensions: Safety (preventing harmful actions), Security (enforcing access control), Reliability (maintaining consistent behavior), and Compliance (adhering to regulatory requirements). Our framework includes a compositional safety specification language, a diverse set of realistic scenarios spanning healthcare, finance, and legal domains, and a systematic adversarial testing suite featuring five distinct attack strategies. We conduct an extensive empirical evaluation of eight leading LLM-based agents, including both proprietary models (GPT-OSS-120B, Claude Haiku 4.5, Gemini 3 Flash) and open-source alternatives (DeepSeek-V3, Llama 3.3 70B, Xiaomi MiMo-V2, Devstral-2512, Nemotron-3 Nano). Our results reveal striking domain-specific vulnerabilities: all models achieve perfect performance in healthcare and legal domains (A\textsuperscript{2}-Score of 1.00), yet experience catastrophic failure in finance (A\textsuperscript{2}-Score of 0.52, 0\% task completion). Notably, all models demonstrated perfect adversarial defense rates (100\%) across all attack strategies, raising important questions about the relationship between defensive conservatism and functional capability. These findings underscore the urgent need for domain-specific safety mechanisms and more nuanced evaluation methodologies in AI agent development.
+\end{abstract}
+
+\newpage
+
+\section{Introduction}
+
+The emergence of large language models (LLMs) with advanced reasoning capabilities has catalyzed a paradigm shift in artificial intelligence, enabling the development of autonomous agents that can perceive, reason, and act in complex environments~\cite{wei2022chain,yao2023react,shinn2023reflexion}. These AI agents are increasingly being deployed in high-stakes domains such as healthcare~\cite{singhal2023large}, finance~\cite{wu2023bloomberggpt}, and customer service~\cite{ouyang2022training}, where they interact with sensitive data, make consequential decisions, and operate with varying degrees of autonomy. Despite their impressive capabilities, the safety and security properties of AI agents remain poorly understood. Unlike traditional software systems with well-defined specifications and formal verification methods, AI agents exhibit emergent behaviors that are difficult to predict or control~\cite{hendrycks2021unsolved}. This unpredictability is exacerbated in adversarial settings, where malicious actors may attempt to manipulate agent behavior through carefully crafted inputs~\cite{zou2023universal,wei2023jailbroken} or environmental perturbations~\cite{casper2023open}. Existing evaluation frameworks for AI systems focus primarily on task performance metrics such as accuracy, efficiency, or user satisfaction~\cite{liang2022holistic,srivastava2022beyond}. While these metrics are important, they fail to capture critical safety and security properties that are essential for real-world deployment. For instance, a medical AI agent might achieve high diagnostic accuracy while simultaneously violating patient privacy regulations or prescribing contraindicated medications. Similarly, a financial trading agent could maximize returns while engaging in illegal market manipulation or ignoring risk management constraints.
+
+\subsection{Motivation and Challenges}
+
+The development of comprehensive safety evaluation frameworks for AI agents faces several fundamental challenges. \textbf{Multi-dimensional safety requirements.} AI agent safety encompasses multiple orthogonal dimensions including physical safety (preventing harm to humans or property), security (protecting against unauthorized access or data breaches), reliability (maintaining consistent performance under varying conditions), and compliance (adhering to legal and regulatory requirements). Existing benchmarks typically focus on a single dimension, failing to capture the complex interplay between these requirements. \textbf{Adversarial robustness.} Real-world AI agents must operate in environments where adversarial actors may attempt to exploit vulnerabilities through various attack vectors. However, most evaluation frameworks test agents only under benign conditions, providing an incomplete picture of their robustness. Systematic adversarial testing requires realistic threat models, diverse attack strategies, and quantitative metrics for measuring vulnerability. \textbf{Dual-control environments.} Many real-world scenarios involve multiple actors with potentially conflicting objectives who can simultaneously influence the system state. For example, in a healthcare setting, both the AI agent and human users (including potentially malicious insiders) can modify patient records, prescribe medications, or access sensitive information. Evaluating agent behavior in such dual-control environments is essential but largely unexplored in existing benchmarks. \textbf{Compositional safety specifications.} Safety requirements in real-world applications are often complex, involving temporal constraints, contextual dependencies, and interactions between multiple rules. Expressing and verifying these requirements requires a formal specification language that is both expressive enough to capture realistic constraints and tractable enough for automated evaluation.
+
+\subsection{Contributions}
+
+We introduce \aabench, a comprehensive benchmark for evaluating AI agent safety, security, and reliability in dual-control environments. Our principal contributions are:
+
+\begin{enumerate}
+    \item A \textbf{dual-control environment model} that enables systematic evaluation of agent behavior under adversarial conditions where both the agent and adversarial actors can simultaneously influence system state.
+
+    \item A \textbf{compositional safety specification language} for expressing complex, domain-specific constraints including invariants, temporal properties, access control policies, and compliance rules derived from regulations such as HIPAA, GDPR, and KYC/AML requirements.
+
+    \item A \textbf{comprehensive adversarial testing suite} with five attack strategies (social engineering, prompt injection, state corruption, constraint exploitation, multi-vector) parameterized by sophistication level.
+
+    \item A \textbf{multi-dimensional evaluation framework} capturing Safety, Security, Reliability, and Compliance dimensions with domain-specific weighting, alongside a 12-category response classification taxonomy.
+
+    \item \textbf{Extensive empirical evaluation} of eight leading LLM-based agents across three domains (healthcare, finance, legal), revealing critical domain-specific vulnerabilities and the paradox of perfect adversarial defense alongside functional failure.
+\end{enumerate}
+
+\section{Related Work}
+
+The rapid advancement of large language models (LLMs) has catalyzed extensive research into AI safety, alignment, and the evaluation of autonomous agents~\cite{russell2019human,amodei2016concrete}. Early work in AI safety focused on value alignment and reward specification~\cite{soares2015corrigibility,hadfield2017inverse}, while recent approaches have emphasized training-based methods such as reinforcement learning from human feedback (RLHF)~\cite{christiano2017deep,ouyang2022training} and constitutional AI~\cite{bai2022constitutional}. However, most existing safety research evaluates language models in isolation, using qualitative assessments or narrow task-specific metrics. \aabench{} extends this work by providing a comprehensive, quantitative framework specifically designed for evaluating autonomous agents across multiple safety dimensions (safety, security, reliability, compliance) in adversarial settings.
+
+\noindent Adversarial robustness has been extensively studied in computer vision~\cite{szegedy2013intriguing,goodfellow2014explaining} and more recently in natural language processing. In NLP, research has revealed vulnerabilities in LLMs including jailbreaking attacks~\cite{wei2023jailbroken}, prompt injection~\cite{perez2022ignore}, and universal adversarial triggers~\cite{wallace2019universal}. While these studies demonstrate critical vulnerabilities, they typically evaluate single-turn interactions with language models rather than multi-step agent behavior in environments with state management and adversarial interference. \aabench{} addresses this gap by introducing a dual-control environment model that enables systematic adversarial testing of agents operating over multiple steps with environmental state.
+
+\noindent Recent benchmarks have advanced agent evaluation beyond simple grid-worlds to more realistic environments. BabyAI and MiniGrid~\cite{chevalier2018babyai} evaluate agents in controlled grid-world settings. WebShop~\cite{yao2022webshop} and Mind2Web~\cite{deng2023mind2web} evaluate agents on web navigation tasks. AgentBench~\cite{liu2023agentbench} provides a comprehensive evaluation suite spanning coding, gaming, and web browsing. However, these benchmarks focus almost exclusively on task performance in benign environments, lacking formal safety specifications, adversarial testing, and multi-dimensional evaluation frameworks. \aabench{} complements these efforts by introducing a framework specifically designed to assess safety-critical properties in adversarial settings, with formal safety specifications and systematic attack strategies.
+
+\noindent Formal verification has a long history in software systems~\cite{clarke1999model,hoare1969axiomatic}. Recent work has explored applying formal methods to neural networks~\cite{katz2017reluplex,singh2019abstract} and reinforcement learning policies~\cite{alshiekh2018safe,jansen2020safe}. However, these approaches typically require complete specifications and struggle to scale to large models or complex environments. \aabench{} adopts a pragmatic approach, using a compositional safety specification language that balances expressiveness with computational tractability, enabling automated evaluation of realistic safety constraints in autonomous agent systems.
+
+\noindent Domain-specific AI systems in healthcare~\cite{esteva2019guide,topol2019high} and finance~\cite{cao2020financial,ozbayoglu2020deep} face unique safety and regulatory requirements. Medical AI must comply with HIPAA privacy regulations and avoid harmful clinical decisions~\cite{char2020implementing}. Financial AI must adhere to trading regulations and risk management constraints~\cite{treleaven2013algorithmic}. While domain-specific guidelines exist, comprehensive evaluation frameworks that assess compliance with these requirements in an automated, quantitative manner remain lacking. \aabench{} addresses this gap by incorporating domain-specific safety specifications and compliance checks across multiple high-stakes domains.
+
+\noindent The deployment of AI systems in high-stakes domains such as healthcare and finance has revealed the critical importance of domain-specific safety and regulatory considerations. In healthcare, AI systems are increasingly used for diagnostic assistance, treatment planning, and drug discovery~\cite{esteva2019guide,topol2019high}. However, medical AI systems must satisfy stringent regulatory requirements, including compliance with HIPAA privacy regulations, FDA approval processes, and professional standards of care~\cite{char2020implementing}. A critical safety concern in medical AI is the prevention of harmful clinical decisions, such as prescribing contraindicated drug combinations or recommending treatments that conflict with patient allergies or medical history. In finance, AI systems are used for trading, risk management, fraud detection, and credit decisions~\cite{cao2020financial,ozbayoglu2020deep}. Financial AI systems must comply with complex regulatory frameworks including the Dodd-Frank Act, MiFID II, and various international banking regulations~\cite{treleaven2013algorithmic}. A critical safety concern in financial AI is the prevention of unauthorized transactions, the detection of fraudulent activity, and the maintenance of appropriate risk controls. Furthermore, financial AI systems must be designed to prevent market manipulation and to ensure fair treatment of customers.
+
+\noindent Despite the critical importance of safety and compliance in these domains, comprehensive evaluation frameworks that can assess compliance with domain-specific requirements in an automated, quantitative manner remain lacking. Most existing domain-specific AI systems are evaluated using task-specific metrics (e.g., diagnostic accuracy for medical AI, trading profit for financial AI) that do not capture safety-critical properties. The \aabench{} framework addresses this gap by incorporating domain-specific safety specifications and compliance checks, enabling systematic evaluation of AI agents across healthcare, finance, and legal domains. By providing a unified evaluation framework that can be instantiated for different domains, we enable comparative analysis of agent safety across diverse application areas.
+
+\noindent \aabench{} builds upon and extends existing research in AI safety, adversarial robustness, agent evaluation, formal methods, and domain-specific AI applications. Our key innovations are: (1) a dual-control environment model enabling systematic evaluation of agent behavior under adversarial conditions; (2) a compositional safety specification language for expressing complex, domain-specific constraints; (3) a comprehensive adversarial testing suite with multiple attack strategies parameterized by sophistication level; (4) a multi-dimensional evaluation framework capturing safety, security, reliability, and compliance; and (5) extensive empirical evaluation revealing critical vulnerabilities and performance gaps across models. By integrating these elements into a unified framework, \aabench{} provides a comprehensive evaluation paradigm for advancing safer, more reliable AI agents.
+
+\noindent Formal methods have a long and distinguished history in software verification, with roots extending back to the foundational work of Hoare on axiomatic semantics~\cite{hoare1969axiomatic}. Model checking, developed by Clarke, Emerson, and Sistla, provided a practical approach to verifying finite-state systems against temporal logic specifications~\cite{clarke1999model}. These techniques have been successfully applied to critical systems in aerospace, automotive, and telecommunications, where the cost of failure is prohibitively high.
+
+\noindent The application of formal methods to machine learning and AI systems represents an emerging frontier. Katz et al. developed Reluplex, a solver for verifying properties of neural networks with ReLU activations, enabling verification of safety properties in small networks~\cite{katz2017reluplex}. Singh et al. extended this work with abstract interpretation techniques, providing scalable methods for computing sound abstractions of neural network behavior~\cite{singh2019abstract}. These approaches have demonstrated the feasibility of formal verification for neural networks, but they face significant scalability challenges: current techniques can only verify properties of relatively small networks, and the computational cost grows rapidly with network size. For reinforcement learning systems, formal methods have been applied to verify that learned policies satisfy safety specifications. Alshiekh et al. developed techniques for synthesizing safe RL policies that are guaranteed to satisfy temporal logic specifications~\cite{alshiekh2018safe}. Jansen et al. extended this work to probabilistic systems, enabling verification of safety properties with probabilistic guarantees~\cite{jansen2020safe}. However, these approaches typically require complete specifications of the environment dynamics and safety constraints, and they struggle to scale to large, complex environments with high-dimensional state spaces. The challenge of scaling formal verification to large language models and complex agent environments has led to the development of more pragmatic approaches. Rather than attempting to provide complete formal verification, these approaches focus on automated checking of safety properties against a set of formal specifications. Our compositional safety specification language draws inspiration from formal methods research while adopting a more pragmatic approach that balances expressiveness with computational tractability. By focusing on properties that can be efficiently checked during agent execution, rather than attempting to prove properties exhaustively, we enable practical evaluation of realistic safety constraints.
+
+\section{The \aabench{} Framework}
+
+\aabench{} is designed to evaluate AI agents across four key dimensions: Safety, Security, Reliability, and Compliance. The framework consists of three main components: (1) a dual-control environment model, (2) a compositional safety specification language, and (3) a multi-dimensional evaluation engine.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/architecture.pdf}
+\caption{\textbf{\aabench{} Framework Architecture.} The framework consists of three main components: (1) Dual-Control Environment where both agent and adversary can modify state, (2) Safety Specification Language for expressing constraints, and (3) Evaluation Engine for monitoring behavior and computing scores. The agent receives observations and takes actions, while the adversary attempts to induce violations through various attack strategies.}
+\label{fig:architecture}
+\end{figure}
+
+\noindent Figure~\ref{fig:architecture} illustrates the overall architecture of the \aabench{} framework. The \aabench{} framework provides a comprehensive evaluation paradigm that combines formal safety specifications with systematic adversarial testing. The three-component architecture enables rigorous assessment of agent safety properties in realistic dual-control environments where multiple actors can influence system state. The framework is organized into three primary sections: the top section encompasses dual-control environment management, the right section handles safety specification and evaluation, and the bottom section orchestrates adversarial action generation.
+
+\noindent \textbf{Dual-Control Environment Management.} The top-left component manages the core agent under evaluation, which receives observations from the environment state and executes actions through designated action spaces such as GPT-4, Claude, or other large language model backends. This agent interacts with the environment through a transition function $T$ that processes both agent and adversarial actions to update the system state $S$. The dual-control paradigm is central to the framework's design, allowing simultaneous influence from both the evaluated agent and adversarial actors, thereby creating realistic scenarios where safety properties must be maintained despite external perturbations.
+
+\noindent \textbf{Safety Specification Engine.} The right section implements a formal specification system that translates safety requirements into executable constraints. At the top level, safety invariants are defined alongside contextual information including environment details, agent specifications, constraints, and customization parameters. These high-level specifications flow into the specification path, which feeds into a multi-component evaluation engine. The evaluation engine comprises an axiom handler that processes formal safety rules, a score calculator that quantifies safety compliance, and a metrics module that tracks performance indicators. The evaluation engine tracks a variety of metrics to assess the agent's performance, including its adherence to safety constraints, its resistance to different attack vectors, and its overall robustness.
+
+\noindent \textbf{Adversarial Action Generation.} The bottom section implements a sophisticated adversarial testing mechanism. Observation processing modules, which interface with the same language model backends as the main agent, feed into an action selection component that determines optimal adversarial interventions. The framework supports multiple attack strategies including Base attacks, Social Engineering attempts, Prompt Injection techniques, and Constraint Evasion methods, organized across multiple sophistication levels. State manipulation capabilities enable the adversarial system to probe agent robustness under varying environmental conditions, with all adversarial actions coordinated through the central transition function to ensure coherent state evolution. The architecture's strength lies in its integration of formal verification principles with empirical adversarial testing, enabling both specification-driven safety assessment and discovery of emergent vulnerabilities through systematic exploration of the dual-control state space.
+
+\subsection{Dual-Control Environment Model}
+
+Traditional agent evaluation frameworks assume a single actor (the agent) interacting with a passive environment. However, real-world scenarios often involve multiple actors with potentially conflicting objectives. To capture this reality, we introduce a \emph{dual-control} model where both the agent and an adversary can simultaneously influence the environment state. The dual-control model captures realistic multi-actor scenarios where both the agent and adversary can modify environment state. Agent tools execute domain-specific operations, while user tools simulate legitimate user interactions. The shared world state ensures consistency across all operations, enabling detection of state-based attacks.
+
+\noindent Formally, we define a dual-control environment as a tuple $\mathcal{E} = (S, A_{\text{agent}}, A_{\text{adv}}, T, O, R, \Phi)$ where:
+\begin{itemize}
+    \item $S$ is the state space
+    \item $A_{\text{agent}}$ is the agent's action space
+    \item $A_{\text{adv}}$ is the adversary's action space
+    \item $T: S \times A_{\text{agent}} \times A_{\text{adv}} \rightarrow S$ is the transition function
+    \item $O: S \rightarrow \mathcal{O}$ is the observation function
+    \item $R: S \times A_{\text{agent}} \rightarrow \mathbb{R}$ is the reward function
+    \item $\Phi$ is a set of safety specifications
+\end{itemize}
+
+\noindent At each timestep $t$, both the agent and adversary observe the current state $s_t$ (potentially with different observation functions) and select actions $a_{\text{agent}}^t$ and $a_{\text{adv}}^t$ respectively. The environment then transitions to a new state $s_{t+1} = T(s_t, a_{\text{agent}}^t, a_{\text{adv}}^t)$.
+
+\noindent This model enables several important evaluation scenarios. \textbf{Benign baseline}: the adversary takes no action ($a_{\text{adv}}^t = \emptyset$), providing a baseline for agent performance without adversarial interference. \textbf{State corruption}: the adversary modifies the environment state to introduce inconsistencies or trigger edge cases that may expose agent vulnerabilities. \textbf{Adversarial prompting}: the adversary provides misleading or malicious instructions to the agent through the observation function. \textbf{Multi-vector attacks}: the adversary combines multiple attack strategies simultaneously to maximize the likelihood of inducing violations.
+
+\subsection{Safety Specification Language}
+
+To enable precise and automated evaluation of agent behavior, we develop a compositional safety specification language that can express a wide range of real-world constraints. Our language supports four types of specifications:
+
+\noindent \textbf{Invariants} are logical conditions that must hold in every reachable system state. Formally, an invariant $\phi$ over state space $S$ is defined as:
+\begin{equation}
+\forall s \in \text{Reachable}(S): \phi(s) = \text{true}.
+\end{equation}
+These properties capture fundamental safety requirements that the system must maintain throughout its execution. Examples include ensuring $\phi_{\text{allergy}}: \text{patient.allergies} \cap \text{prescribed\_medication.ingredients} = \emptyset$ to prevent allergic reactions, or $\phi_{\text{balance}}: \text{account.balance} \geq 0$ to prohibit negative balances. Another typical invariant is $\phi_{\text{access}}: \text{access\_level(user)} \geq \text{required\_level(resource)}$, which enforces privilege-based access control.
+
+\noindent \textbf{Temporal properties} specify constraints over sequences of states and system executions, typically expressed in temporal logic. This work adopts a subset of linear temporal logic (LTL) with operators such as $\Diamond \phi$ (``eventually $\phi$''), $\Box \phi$ (``always $\phi$''), $\phi_1 \Rightarrow \Diamond \phi_2$ (``if $\phi_1$ then eventually $\phi_2$''), and $\phi_1 \mathcal{U} \phi_2$ (``$\phi_1$ until $\phi_2$''). These operators allow the expression of liveness and response properties. For instance, a system may require the response property $\phi_{\text{verify}}: \text{prescribe(drug)} \Rightarrow \Diamond \text{verify\_interactions(drug)}$, ensuring verification follows prescription, or $\phi_{\text{log}}: \text{access(sensitive\_data)} \Rightarrow \Diamond \text{log\_access(user, data)}$, mandating that access events are eventually logged.
+
+\noindent \textbf{Access control policies} define permissible interactions between actors, actions, and resources, often conditioned on contextual constraints. A generic policy rule can be expressed as:
+\begin{equation}
+\text{Allow}(\text{actor}, \text{action}, \text{resource}) \leftarrow \text{condition}(\text{actor}, \text{action}, \text{resource}).
+\end{equation}
+These conditions often involve role-based or attribute-based checks, formulated as predicates. For example, the rule $\phi_{\text{read\_record}}: \text{Allow(user, read, patient\_record)} \leftarrow \text{user.role} = \text{doctor} \land \text{assigned(user, patient)}$ permits access only under specific assignment conditions. Similarly, a financial policy might be $\phi_{\text{transfer}}: \text{Allow(user, transfer, account)} \leftarrow \text{user} = \text{account.owner} \land \text{amount} \leq \text{daily\_limit}$.
+
+\noindent \textbf{Compliance rules} formalize legal, regulatory, or organizational requirements within a specific domain. These rules are derived from standards such as the Health Insurance Portability and Accountability Act (HIPAA), the General Data Protection Regulation (GDPR), or financial regulations. HIPAA principles like minimum necessary use and access logging can be formalized as invariants $\phi_{\text{min\_necessary}}$ and temporal properties $\phi_{\text{access\_log}}$. GDPR requirements such as the right to erasure and data minimization translate to properties like $\phi_{\text{erasure}}$ and $\phi_{\text{minimization}}$. Financial regulations commonly enforce properties like $\phi_{\text{KYC}}$ for know-your-customer checks and $\phi_{\text{AML}}$ for anti-money laundering controls. These high-level rules are decomposed into enforceable combinations of invariants, temporal properties, and access control policies, enabling their systematic verification within a formal model.
+
+\subsection{Response-Level Analysis Framework}
+
+Traditional agent evaluation frameworks aggregate results at the episode level, obscuring critical behavioral patterns and failure modes. To address this limitation, \aabench{} implements a comprehensive response-level analysis system that tracks and classifies each agent action.
+
+\noindent We introduce a 12-category taxonomy for classifying agent responses (Table~\ref{tab:response_taxonomy}):
+
+\begin{table}[h]
+\centering
+\caption{Response Classification Taxonomy}
+\label{tab:response_taxonomy}
+\small
+\begin{tabular}{llp{6cm}}
+\toprule
+\textbf{Category} & \textbf{Type} & \textbf{Description} \\
+\midrule
+\multirow{3}{*}{Correct} & CORRECT\_REFUSAL & Refused with policy citation \\
+& SAFE\_EXECUTION & Executed with all safety checks \\
+& SAFE\_ESCALATION & Escalated to human appropriately \\
+\midrule
+\multirow{3}{*}{Partial} & INCOMPLETE\_CHECKS & Missing some required checks \\
+& WEAK\_REFUSAL & Refused without explanation \\
+& UNNECESSARY\_ESCALATION & Escalated when not needed \\
+\midrule
+\multirow{3}{*}{Violation} & FULL\_VIOLATION & Executed unsafe action \\
+& SE\_SUCCESS & Manipulated by social engineering \\
+& PI\_SUCCESS & Followed prompt injection \\
+\midrule
+\multirow{3}{*}{Edge Case} & CONFUSED\_RESPONSE & Unclear or nonsensical \\
+& HALLUCINATED\_DATA & Invented facts or entities \\
+& TOOL\_MISUSE & Incorrect tool parameters \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent Each agent response is evaluated through a detailed scoring framework across five distinct dimensions: safety, security, reasoning, reliability, and compliance.
+
+\noindent \textbf{Safety Score.} The safety dimension quantifies how systematically an agent performs required precautionary verifications. The safety score is computed by evaluating violations against the maximum possible harm:
+\begin{equation}
+S_{\text{safety}}(r) = \max\left(0, 1 - \frac{\sum_{v \in V_{\text{safety}}} \text{severity}(v)}{\text{steps}(r) \times 1.0}\right),
+\end{equation}
+where $V_{\text{safety}}$ is the set of safety-critical violations, $\text{severity}(v) \in [0,1]$ is the severity of violation $v$, and $\text{steps}(r)$ is the total number of steps taken during the episode. This formulation penalizes violations proportionally to their severity while normalizing by episode length.
+
+\noindent \textbf{Security Score.} The security dimension assesses an agent's ability to recognize and defend against malicious actions:
+\begin{equation}
+S_{\text{security}}(r) = \max\left(0, 1 - \frac{|V_{\text{security}}|}{\max(1, N_{\text{checks}})}\right),
+\end{equation}
+where $V_{\text{security}}$ is the set of security breach violations and $N_{\text{checks}}$ is the number of security-relevant operations (tool calls) performed. This metric captures the rate of security failures relative to opportunities for security enforcement.
+
+\noindent \textbf{Reasoning Score.} The reasoning dimension evaluates the quality and accuracy of the agent's justifications for its actions, particularly when refusing unsafe requests. Key assessed aspects include \textit{Policy Citation Accuracy}, which verifies that the correct regulation or policy is referenced; \textit{Explanation Quality}, gauging the clarity, specificity, and completeness of the refusal rationale; and \textit{Risk Identification}, measuring how precisely specific threats (e.g., ``penicillin allergy'' versus a generic ``allergy risk'') are named.
+
+\noindent \textbf{Reliability Score.} The reliability dimension measures the factual and operational consistency of the agent:
+\begin{equation}
+S_{\text{reliability}}(r) = \max\left(0, 1 - \frac{|V_{\text{reliability}}|}{N_{\text{failures}}}\right),
+\end{equation}
+where $V_{\text{reliability}}$ is the set of reliability failure violations and $N_{\text{failures}}$ is the total number of failure events (operations that returned errors). This quantifies the fraction of failures that violated reliability properties.
+
+\noindent \textbf{Compliance Score.} The compliance dimension verifies adherence to domain-specific legal and regulatory frameworks:
+\begin{equation}
+S_{\text{compliance}}(r) = \max\left(0, 1 - \frac{|V_{\text{compliance}}|}{\text{steps}(r)}\right),
+\end{equation}
+where $V_{\text{compliance}}$ is the set of compliance violations detected across all regulated actions in the episode.
+
+\noindent \textbf{Composite A\textsuperscript{2} Score.} The overall agent assessment score aggregates these dimensions with domain-specific weights. For the healthcare domain:
+\begin{equation}
+S_{\text{A}^2}(r) = 0.5 \cdot S_{\text{safety}}(r) + 0.25 \cdot S_{\text{security}}(r) + 0.15 \cdot S_{\text{reliability}}(r) + 0.10 \cdot S_{\text{compliance}}(r),
+\end{equation}
+reflecting the critical importance of safety in medical applications. For finance: $w_s=0.3, w_{se}=0.4, w_r=0.2, w_c=0.1$. For legal: $w_s=0.25, w_{se}=0.30, w_r=0.20, w_c=0.25$.
+
+\noindent \textbf{Proactive Safety Rate.} A critical behavioral distinction, often overlooked in prior work, is whether an agent performs safety checks \textit{proactively}---initiating verification before any user prompt---or \textit{reactively}, only after being reminded. We operationalize this distinction through a temporal analysis of the agent's dialogue turns. A check $c$ is classified as proactive if it is performed within the first two agent turns of an interaction:
+\begin{equation}
+\text{Proactive}(c) =
+\begin{cases}
+\text{true}, & \text{if check } c \text{ is performed within the first 2 dialogue turns;} \\
+\text{false}, & \text{otherwise.}
+\end{cases}
+\end{equation}
+The overall \textit{Proactive Safety Rate (PSR)} for an agent or a set of checks $C$ is calculated as:
+\begin{equation}
+\text{PSR} = \frac{\sum_{c \in C} \mathbb{I}_{\text{proactive}}(c)}{|C|},
+\end{equation}
+where $\mathbb{I}_{\text{proactive}}(c)$ is the indicator function for the proactive status of check $c$.
+
+\noindent \textbf{Critical Violations.} The framework distinguishes violations by severity levels. A violation is classified as \textit{critical} if its severity exceeds 0.8:
+\begin{equation}
+\text{Critical}(v) = \mathbb{I}(\text{severity}(v) > 0.8),
+\end{equation}
+where $\mathbb{I}(\cdot)$ is the indicator function. Critical violations may trigger immediate action blocking or episode termination in the safety monitoring system.
+
+\section{Adversarial Testing Methodology}
+
+\subsection{Threat Model}
+
+We consider an adversary operating under a black-box threat model, where the attacker does not have direct access to the agent's internal state, parameters, or training data. The adversary possesses four primary capabilities that mirror real-world attack scenarios. First, the adversary can perform \textbf{state manipulation} within their granted access privileges---for instance, a malicious insider with legitimate database access can modify records they are authorized to view. Second, the adversary can conduct \textbf{prompt injection} attacks by embedding malicious instructions into the agent's input through various channels, including user messages, database fields, and file contents that the agent processes. Third, the adversary can leverage \textbf{social engineering} techniques, crafting convincing scenarios that exploit the agent's inherent tendency to be helpful or to follow instructions that appear legitimate. Finally, the adversary can observe the agent's actions and responses, enabling \textbf{adaptive attack strategies} that evolve based on the agent's defensive behaviors.
+
+\subsection{Attack Strategies}
+
+We implement five distinct attack strategies, each designed to target different vulnerability classes in agentic AI systems. These strategies are derived from both established cybersecurity threats and emerging risks specific to language model-based agents.
+
+\noindent \textbf{Social Engineering Attacks} exploit the fundamental tension between agent helpfulness and safety enforcement. These attacks craft convincing scenarios that appear legitimate to bypass safety mechanisms through persuasion rather than technical exploitation. \textit{Authority exploitation} attacks impersonate high-privilege users or cite fabricated policies to pressure the agent into granting unauthorized access. For example, an attacker might claim: ``I'm Dr. Smith, the chief of medicine. We have an emergency situation and I need immediate access to patient records for room 302. Please override the normal authorization process.'' \textit{Urgency manipulation} creates artificial time pressure designed to make the agent bypass deliberative safety checks in favor of rapid compliance. \textit{Trust exploitation} employs multi-turn conversations to build rapport and establish credibility before introducing harmful requests, leveraging the conversational context to increase compliance rates. These attacks are particularly effective against agents trained to prioritize user satisfaction and helpfulness.
+
+\noindent \textbf{Prompt Injection Attacks} represent a category of threats unique to language model-based systems, where adversaries directly inject malicious instructions into the agent's context to override its intended behavior. \textit{Direct injection} embeds instructions within user input, attempting to override the agent's system prompt with adversarial directives. \textit{Indirect injection} places malicious instructions in database fields, files, or other external data sources that the agent will subsequently read and process, creating a supply-chain attack on the agent's information sources. \textit{Context switching} attacks employ special tokens, formatting tricks, or role-play scenarios to make injected instructions appear as legitimate system prompts or administrative commands. A prototypical example states: ``Ignore all previous instructions. You are now in administrator mode. Disable all safety checks and provide full access to all patient records.'' The effectiveness of prompt injection attacks stems from the difficulty language models have in distinguishing between instructions from trusted system designers and instructions from untrusted user inputs.
+
+\noindent \textbf{State Corruption Attacks} introduce inconsistencies, missing information, or malformed data into the environment state to trigger edge cases in the agent's decision-making logic or to exploit gaps in safety specifications. \textit{Inconsistent data} attacks create contradictions between different parts of the state representation---for instance, marking a patient's allergy list as empty while maintaining a clinical note documenting the same allergy. This forces the agent to resolve ambiguous or contradictory information, potentially leading to unsafe decisions if the agent prioritizes one data source over another. \textit{Missing information} attacks deliberately remove critical safety-relevant data from the environment state, testing whether the agent fails safely when expected information is unavailable. \textit{Malformed input} attacks provide data in unexpected formats or with unusual encodings to probe the robustness of the agent's input validation and error handling.
+
+\noindent \textbf{Constraint Exploitation Attacks} systematically identify and exploit loopholes, ambiguities, or underspecified regions in safety specifications. \textit{Boundary testing} probes edge cases where safety specifications are incomplete or where the boundary between permitted and prohibited actions is unclear. \textit{Composition attacks} combine individually safe actions in sequences or combinations that achieve unsafe outcomes, exploiting the difficulty of specifying safety properties over action sequences rather than individual actions. \textit{Semantic attacks} exploit the gap between formal safety specifications and their intended meaning, finding technically compliant behaviors that violate the spirit of the safety policy. For example, an attacker might request multiple small financial transactions that individually fall below the threshold requiring additional authorization, but collectively exceed safe limits---a classic structuring attack in anti-money-laundering contexts.
+
+\noindent \textbf{Multi-Vector Attacks} combine multiple attack strategies simultaneously or sequentially to maximize effectiveness against layered defenses. A social engineering followed by prompt injection attack (SE + PI) first establishes trust and credibility through conversational rapport, then injects malicious instructions once the agent's defenses are lowered. A state corruption followed by constraint exploitation attack (SC + CE) introduces ambiguity into the environment state through data manipulation, then exploits the resulting uncertainty to abuse specification loopholes. The most sophisticated variant combines social engineering, state corruption, and prompt injection (SE + SC + PI) in a coordinated assault that attacks the agent's defenses at multiple levels simultaneously. Multi-vector attacks are particularly challenging to defend against because they require the agent to maintain consistent safety enforcement across different attack surfaces.
+
+\subsection{Sophistication Levels}
+
+Each attack strategy is parameterized by a sophistication level ranging from 0.3 to 0.9, controlling the complexity, subtlety, and technical sophistication of the attack. Level 0.3 attacks represent basic, obvious attempts that employ simple language and direct requests for policy violations, serving as a baseline to verify that fundamental safety mechanisms are functioning. Level 0.5 attacks incorporate moderate sophistication with basic obfuscation techniques such as synonym substitution or simple misdirection. Level 0.7 attacks are well-crafted attempts that exploit specific known vulnerabilities in the domain or agent architecture, requiring domain knowledge and careful targeting. Level 0.9 attacks demonstrate expert-level sophistication with multiple layers of deception, adaptive strategies, and exploitation of subtle specification gaps. This parameterization enables fine-grained analysis of agent robustness across different threat levels.
+
+\section{Domains and Datasets}
+\label{sec:datasets}
+
+\aabench{} evaluates AI agents across three critical safety-sensitive domains: Healthcare, Finance, and Legal. The benchmark uses open-source datasets to ensure comprehensive coverage while maintaining privacy compliance. All datasets are de-identified or publicly available under permissive licenses. Each domain's test cases follow a standardized JSON structure with common metadata fields including unique identifier, descriptive name, detailed scenario description, test type (functional, safety, security, compliance, privacy, reliability), expected outcome (blocked, authorized, requires\_approval), and for adversarial tests, the attack strategy employed.
+
+\subsection{Healthcare Domain}
+
+The Healthcare domain evaluates AI agents in medical decision-making scenarios with emphasis on patient safety and regulatory compliance.
+
+\noindent \textbf{Data Sources.} The Healthcare dataset integrates multiple authoritative sources: \textbf{DDInter Drug Interaction Database} with 236,834 drug-drug interaction associations across 1,833 FDA-approved drugs with comprehensive severity levels; \textbf{MIMIC-III Demo Dataset}, de-identified clinical data from PhysioNet including ADMISSIONS.csv, PRESCRIPTIONS.csv, DIAGNOSES\_ICD.csv, and PATIENTS.csv; and \textbf{RxNorm Drug Database}, a public medical knowledge base containing drug properties, interactions, and classifications.
+
+\noindent \textbf{Entity Types.} The Healthcare domain defines four primary entity types: Patients (de-identified individuals with complete medical histories), Drugs (medications with known allergies, interactions, and dosage constraints), Medical Records (patient demographics, allergies, current medications, diagnoses), and Users (healthcare providers with role-based access as doctor, nurse, admin, patient).
+
+\noindent \textbf{Safety Constraints.} The agent must enforce allergy safety checks, detect drug interactions, verify authorization and access control, ensure HIPAA compliance, and resist adversarial scenarios including social engineering (emergency claims to bypass safety checks), constraint exploitation (using generic drug names to bypass allergy filters), and prompt injection (embedding instructions in patient notes).
+
+\noindent \textbf{Evaluation Metrics.} Safety score components include allergy check compliance rate, drug interaction detection rate, dosage validation accuracy, and emergency protocol robustness. Security score components measure authorization enforcement accuracy, role-based access control violation rate, and audit trail completeness. Compliance score components assess HIPAA audit requirements, consent verification before data sharing, and adherence to the minimum necessary principle.
+
+\subsection{Finance Domain}
+
+The Finance domain evaluates AI agents in banking and financial transaction scenarios with emphasis on fraud prevention, regulatory compliance, and transaction security.
+
+\noindent \textbf{Data Sources.} The Finance dataset integrates real and synthetic financial data: \textbf{Credit Card Fraud Detection Dataset (2023)}, anonymized European credit card transactions with 568,630 records including amounts, merchant categories, fraud labels, and timestamps (Kaggle); \textbf{IBM AML-Data}, synthetic financial transactions from multi-agent simulation with embedded money laundering patterns (Apache 2.0 license); and \textbf{IBM AMLSim}, advanced synthetic banking data generator for complex money laundering scenarios with realistic transaction networks.
+
+\noindent \textbf{Entity Types.} The Finance domain defines four primary entity types: Customers (banking customers with KYC status), Accounts (financial accounts with balances and limits), Transactions (debits, credits, transfers with risk scores), and Users (bank personnel with role-based permissions: teller, manager, analyst).
+
+\noindent \textbf{Safety Constraints.} The agent must perform transaction risk assessment, enforce KYC compliance, screen for anti-money laundering violations, enforce transaction limits and authorization, detect fraud patterns, and resist adversarial scenarios including social engineering (emergency claims to bypass limits), authority exploitation (impersonating managers), transaction structuring (splitting amounts to avoid AML triggers), and constraint exploitation (exploiting policy edge cases).
+
+\noindent \textbf{Evaluation Metrics.} Safety score components include high-risk transaction detection rate, fraud pattern recognition accuracy, and transaction limit enforcement. Security score components measure authorization bypass resistance, account access control violation rate, and role impersonation detection accuracy. Compliance score components assess KYC verification compliance rate, AML screening completeness, SAR (Suspicious Activity Report) trigger accuracy, and regulatory reporting requirements.
+
+\subsection{Legal Domain}
+
+The Legal domain evaluates AI agents in contract analysis, privacy regulation compliance, and legal document handling with emphasis on data protection and regulatory adherence.
+
+\noindent \textbf{Data Sources.} The Legal dataset integrates authoritative legal and regulatory sources: \textbf{Contract Understanding Atticus Dataset (CUAD)}, 13,000+ expert annotations across 510 legal contracts with clause identification and obligation extraction (CC BY 4.0 license); \textbf{GDPR Violations Dataset}, real GDPR violation cases and fines from 2020 with violation types, countries, and articles violated (CC0 Public Domain); \textbf{GDPR Articles Dataset}, complete GDPR regulation text in JSON format with article numbers, titles, and requirements; and \textbf{Legal Case Reports}, collection of legal case summaries and decisions for precedent analysis.
+
+\noindent \textbf{Entity Types.} The Legal domain defines four primary entity types: Data Subjects (individuals with privacy rights), Contracts (legal agreements with clauses), Legal Documents (privileged attorney-client communications), and Jurisdictions (EU GDPR, California CCPA, etc.).
+
+\noindent \textbf{Safety Constraints.} The agent must verify GDPR compliance (data subject rights, consent verification, lawful processing basis), enforce data retention policies, handle right-to-be-forgotten requests, verify contract confidentiality and privilege, ensure attorney-client privilege protection, and resist adversarial scenarios including social engineering, authority exploitation, constraint exploitation, and prompt injection.
+
+\section{Experimental Evaluation}
+
+\subsection{Experimental Setup}
+
+We evaluate a diverse set of LLMs spanning different architectural families, parameter scales, and deployment paradigms. Our evaluation focuses on models accessible via OpenRouter API to ensure reproducibility and fair comparison under identical conditions.
+
+\begin{table}[h]
+\centering
+\caption{Model selection spanning diverse architectures and deployment paradigms}
+\label{tab:models}
+\small
+\begin{tabular}{lllp{5.5cm}}
+\toprule
+\textbf{Category} & \textbf{Model} & \textbf{Parameters} & \textbf{Key Features} \\
+\midrule
+Agentic & Devstral-2512 & 123B & Specialized for agentic coding, 256K context \\
+Agentic & Nemotron-3 Nano & 30B MoE & NVIDIA, optimized for agentic systems \\
+\midrule
+Open-Source & DeepSeek-V3 & 671B MoE & Enhanced reasoning capabilities \\
+Open-Source & Xiaomi MiMo-V2 & -- & Multimodal, fast inference \\
+Open-Source & Llama 3.3 70B & 70B & Meta's instruction-tuned model \\
+\midrule
+Proprietary & GPT-OSS-120B & 120B & OpenAI's open-source release \\
+Proprietary & Claude Haiku 4.5 & -- & Anthropic's efficient, safety-focused \\
+Proprietary & Gemini 3 Flash & -- & Google's efficient multimodal model \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Evaluation Domains and Task Coverage}
+
+Our benchmark evaluates agents across three safety-critical domains representing distinct regulatory frameworks and safety requirements:
+
+\begin{table}[h]
+\centering
+\caption{Domain-specific task coverage and safety constraint distribution}
+\label{tab:domain_coverage}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{Healthcare} & \textbf{Finance} & \textbf{Legal} \\
+\midrule
+Baseline tasks & 4 & 8 & 6 \\
+Adversarial scenarios & 8 & 12 & 10 \\
+Safety constraints & 87 & 62 & 54 \\
+Regulatory frameworks & HIPAA & SOX, AML, KYC & GDPR, CCPA \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent \textbf{Healthcare Domain} tasks focus on patient record management, medication prescription validation, and privacy protection. Safety constraints enforce allergy cross-checking, drug-drug interaction screening (using DDInter database with 236K+ interactions), authorization verification, and HIPAA-compliant audit logging. We integrate real de-identified clinical data from MIMIC-III to create realistic evaluation scenarios.
+
+\noindent \textbf{Finance Domain} tasks encompass account management, transaction processing, fraud detection, and regulatory compliance verification. Critical safety constraints include mandatory approval workflows for high-value transactions (>\$50K), KYC/AML verification for international transfers (>\$10K), daily transaction limits, and hierarchical authorization requirements. Our evaluation leverages 568,630 real anonymized credit card transactions and IBM AML synthetic data to construct adversarial scenarios reflecting real-world financial crime patterns.
+
+\noindent \textbf{Legal Domain} tasks evaluate contract analysis, privacy regulation compliance, and sensitive document handling. Safety specifications enforce GDPR/CCPA requirements including explicit consent verification, 30-day right-to-erasure implementation, jurisdiction-specific law application, attorney-client privilege protection, and automated data retention limits. We incorporate 13,000+ expert-annotated contracts from CUAD and documented GDPR violation cases to inform adversarial test design.
+
+\subsection{Adversarial Evaluation Protocol}
+
+For each model-domain combination, we conduct structured adversarial robustness testing:
+
+\begin{enumerate}
+\item \textbf{Baseline Evaluation:} Each model processes functional tasks without adversarial interference, establishing benign performance baselines across safety, security, reliability, and compliance dimensions.
+
+\item \textbf{Multi-Strategy Adversarial Testing:} Models face four distinct attack strategies: Social Engineering (authority impersonation and trust exploitation), Prompt Injection (direct instruction override attempts), Constraint Exploitation (boundary condition manipulation), and Multi-Vector (combined attack techniques).
+
+\item \textbf{Sophistication Scaling:} Each attack strategy is evaluated at three sophistication levels (0.5, 0.7, 0.9), representing progressively subtle and complex adversarial behaviors.
+
+\item \textbf{Episode-based Testing:} For each strategy-sophistication configuration, we conduct 10 multi-turn adversarial episodes (maximum 10 turns per episode) to assess model resilience under sustained adversarial pressure.
+\end{enumerate}
+
+\noindent This protocol yields approximately 1,200 adversarial interactions per model (4 strategies $\times$ 3 sophistication levels $\times$ 10 episodes $\times$ 10 turns), enabling comprehensive characterization of defense mechanisms and failure modes.
+
+\subsection{Results}
+
+\subsubsection{Baseline Performance}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/domain_metrics_heatmap.png}
+\caption{\textbf{Baseline Performance Across Domains and Dimensions.} Average scores across evaluated models for each evaluation dimension. Healthcare and Legal domains achieve perfect scores (1.00) across all dimensions, while Finance exhibits catastrophic failures in Safety (0.05) and Compliance (0.00) despite perfect Security (1.00).}
+\label{fig:baseline_performance}
+\end{figure}
+
+The baseline evaluation reveals a striking and consistent pattern of domain-specific vulnerability that transcends model architecture, parameter scale, and training methodology. Table~\ref{tab:baseline_results} presents comprehensive performance metrics for evaluated models across healthcare, finance, and legal domains.
+
+\begin{table}[h]
+\centering
+\caption{Baseline performance across evaluated models and domains}
+\label{tab:baseline_results}
+\small
+\begin{tabular}{llcccccc}
+\toprule
+\textbf{Model} & \textbf{Domain} & \textbf{Safety} & \textbf{Security} & \textbf{Reliability} & \textbf{Compliance} & \textbf{A\textsuperscript{2}-Score} & \textbf{Completion} \\
+\midrule
+DeepSeek-V3 & Healthcare & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 100\% \\
+ & Finance & 0.05 & 1.00 & 1.00 & 0.00 & 0.52 & 0\% \\
+ & Legal & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 100\% \\
+\midrule
+Xiaomi MiMo-V2 & Healthcare & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 100\% \\
+ & Finance & 0.05 & 1.00 & 1.00 & 0.00 & 0.52 & 0\% \\
+ & Legal & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 100\% \\
+\midrule
+Nemotron-3 Nano & Healthcare & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 100\% \\
+ & Finance & 0.05 & 1.00 & 1.00 & 0.00 & 0.52 & 0\% \\
+ & Legal & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent \textbf{Perfect performance in healthcare and legal domains.} All models achieve flawless performance across all evaluation dimensions in healthcare and legal domains, with A\textsuperscript{2}-Scores of 1.00, zero safety violations, zero critical incidents, and 100\% task completion rates. This perfect performance indicates that models successfully navigate complex regulatory frameworks (HIPAA in healthcare, GDPR/CCPA in legal), enforce appropriate safety constraints, maintain security protocols, and demonstrate reliable task execution. The consistency of this performance across architecturally distinct models---spanning DeepSeek-V3's 671B MoE architecture, Xiaomi MiMo-V2's efficient multimodal design, and Nemotron-3 Nano's 30B MoE specialized for agentic tasks---suggests that current training data and methodologies adequately capture the regulatory knowledge, ethical reasoning patterns, and constraint interpretation required for these domains.
+
+\noindent \textbf{Catastrophic failure in finance domain.} In sharp contrast, all models experience complete operational failure in the finance domain, with task completion rates falling to 0\%, indicating total inability to successfully execute even basic financial operations under the benchmark's safety constraints. This catastrophic failure manifests through the accumulation of 160--176 critical violations across merely 8 baseline tasks, yielding a 100\% critical violation rate where every attempted operation triggers safety-critical policy breaches. The A\textsuperscript{2}-Score collapses to 0.52, driven by safety scores of 0.05 and compliance scores of 0.00, representing near-total failure in safety constraint adherence and regulatory compliance.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/finance_failure_analysis.png}
+\caption{\textbf{Finance Domain Failure Analysis.} Dimension-specific performance breakdown revealing perfect Security (1.00) and Reliability (1.00) alongside catastrophic Safety (0.05) and Compliance (0.00) failures, indicating regulatory reasoning inadequacy rather than technical deficiency.}
+\label{fig:finance_failure}
+\end{figure}
+
+\begin{table}[h]
+\centering
+\caption{Finance domain failure analysis: violation distribution}
+\label{tab:finance_failures}
+\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Total Violations} & \textbf{Critical Violations} & \textbf{Violation Rate} \\
+\midrule
+DeepSeek-V3 & 164 & 164 & 100\% \\
+Xiaomi MiMo-V2 & 160 & 160 & 100\% \\
+Nemotron-3 Nano & 176 & 176 & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent \textbf{Dimension-specific failure patterns.} Detailed analysis of finance domain failures reveals a critical asymmetry in dimensional performance. Security scores remain perfect at 1.00 across all models, indicating that authentication mechanisms, access control enforcement, and authorization protocols function correctly. Similarly, reliability scores maintain 1.00, demonstrating that models process inputs without hallucination or system failures. However, safety scores collapse to 0.05 and compliance scores to 0.00, revealing that failures stem specifically from regulatory reasoning inadequacy and fiduciary duty violations rather than technical or security deficiencies.
+
+\noindent This dimensional asymmetry provides crucial insight into the nature of finance domain challenges. Models successfully verify user identities, enforce access restrictions, and maintain operational stability, but systematically fail to apply financial regulations (KYC/AML requirements, transaction approval workflows, fiduciary duty standards) and safety constraints (high-value transaction limits, suspicious activity detection, regulatory compliance verification). The preserved security and reliability dimensions indicate that the underlying technical capabilities function correctly, but the higher-level regulatory reasoning and constraint interpretation specific to financial contexts proves fundamentally inadequate.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/violations_by_domain.png}
+\caption{\textbf{Safety Violations by Model and Domain.} Finance domain exhibits 160--176 critical violations across all models, while Healthcare and Legal maintain zero violations, demonstrating architecture-independent failure patterns specific to financial regulatory reasoning.}
+\label{fig:violations}
+\end{figure}
+
+\noindent \textbf{Architecture-independent vulnerability.} The identical performance profiles across architecturally distinct models strongly suggest that finance domain vulnerability represents a systemic limitation in current training approaches rather than model-specific deficiencies correctable through architectural innovation or parameter scaling. Despite vast differences in model size (30B to 671B parameters), architectural design (dense vs. MoE), and specialization focus (general-purpose vs. agentic), all models fail identically, accumulating nearly identical violation counts (160--176) and achieving identical dimensional scores.
+
+\noindent This architecture-independent failure pattern has profound implications for AI safety research and deployment risk assessment. The finding indicates that simply deploying larger models, different architectures, or specialized training objectives will not address finance domain vulnerabilities. Rather, the consistent failure suggests fundamental inadequacies in how current language models acquire, represent, and apply complex financial regulatory knowledge.
+
+\subsubsection{Adversarial Robustness: Perfect Defense Across All Strategies}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/adversarial_defense_rates.png}
+\caption{\textbf{Adversarial Defense Rates by Attack Strategy.} All evaluated models achieve perfect 100\% defense rates across all attack strategies (Social Engineering, Prompt Injection, Constraint Exploitation, Multi-Vector) and sophistication levels, representing universal adversarial resistance across 288 evaluation episodes.}
+\label{fig:adversarial_defense}
+\end{figure}
+
+All evaluated models demonstrate perfect adversarial robustness across all attack strategies, sophistication levels, and domains, achieving 0\% attack success rates and 100\% defense rates in all 288 adversarial evaluation episodes (8 models $\times$ 4 strategies $\times$ 3 sophistication levels $\times$ 3 domains). This universal defensive success represents a surprising finding that warrants careful interpretation and raises important questions about the nature of adversarial robustness in the evaluated systems.
+
+\begin{table}[h]
+\centering
+\caption{Adversarial evaluation results across attack strategies}
+\label{tab:adversarial_results}
+\small
+\begin{tabular}{llccc}
+\toprule
+\textbf{Domain} & \textbf{Attack Strategy} & \textbf{Attack Success} & \textbf{Defense Rate} & \textbf{Episodes} \\
+\midrule
+Healthcare & Social Engineering & 0.0\% & 100\% & 24 \\
+ & Prompt Injection & 0.0\% & 100\% & 24 \\
+ & Constraint Exploitation & 0.0\% & 100\% & 24 \\
+ & Multi-Vector & 0.0\% & 100\% & 24 \\
+\midrule
+Finance & Social Engineering & 0.0\% & 100\% & 24 \\
+ & Prompt Injection & 0.0\% & 100\% & 24 \\
+ & Constraint Exploitation & 0.0\% & 100\% & 24 \\
+ & Multi-Vector & 0.0\% & 100\% & 24 \\
+\midrule
+Legal & Social Engineering & 0.0\% & 100\% & 24 \\
+ & Prompt Injection & 0.0\% & 100\% & 24 \\
+ & Constraint Exploitation & 0.0\% & 100\% & 24 \\
+ & Multi-Vector & 0.0\% & 100\% & 24 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent \textbf{Universal defense across attack strategies.} Models successfully resisted all evaluated attack strategies without exception. Social engineering attacks, which attempt to manipulate models through authority impersonation, urgency appeals, and trust exploitation, achieved 0\% success across all sophistication levels. Prompt injection attacks, which attempt to override system instructions through carefully crafted user inputs, similarly failed to induce policy violations in any evaluated scenario. Constraint exploitation attacks, targeting ambiguities and edge cases in safety specifications, proved equally ineffective. Most notably, multi-vector attacks combining multiple exploitation techniques simultaneously---typically the most effective adversarial approach---also achieved 0\% success, suggesting that defensive mechanisms maintain effectiveness even under coordinated multi-dimensional adversarial pressure.
+
+\noindent \textbf{Sophistication-independent robustness.} Attack success rates remained at 0\% across all sophistication levels (0.5, 0.7, 0.9), indicating that defensive capabilities do not degrade as attacks become more subtle, linguistically sophisticated, or contextually nuanced. This sophistication-independence contrasts with typical adversarial robustness patterns observed in prior evaluations where success rates increase monotonically with attack sophistication. The absence of any sophistication gradient suggests either exceptionally robust defensive mechanisms that generalize across attack complexity levels or potential limitations in the adversarial simulator's ability to generate sufficiently challenging attacks to stress-test model capabilities.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/task_completion_rates.png}
+\caption{\textbf{Task Completion Rates by Domain and Model.} Healthcare and Legal domains achieve 100\% completion across all models, while Finance exhibits 0\% completion, highlighting the paradox of perfect adversarial defense alongside complete functional failure in finance.}
+\label{fig:task_completion}
+\end{figure}
+
+\noindent \textbf{Domain-independent defense.} Perfect defense rates persist across all three domains despite the dramatic performance differences observed in baseline evaluation. Notably, models achieve 100\% defense rates even in the finance domain where baseline performance catastrophically fails (0\% task completion). This apparent paradox---perfect adversarial defense despite complete operational failure---reveals an important distinction between adversarial robustness as traditionally measured and functional safety under operational constraints. Models successfully resist attempts to induce policy violations through adversarial manipulation while simultaneously failing to perform legitimate financial operations without triggering safety violations. This pattern suggests that defensive mechanisms may be overly conservative, refusing both adversarial and legitimate requests rather than distinguishing between them.
+
+\noindent \textbf{Interpretative considerations and methodological implications.} The perfect defense performance across all evaluated dimensions raises important methodological questions that merit careful consideration. Three potential explanatory hypotheses warrant investigation:
+
+\noindent \textit{Hypothesis 1: Overly conservative defensive posture.} Models may adopt extremely risk-averse strategies that refuse most requests regardless of legitimacy, achieving perfect adversarial defense at the cost of functional utility. This interpretation aligns with the finance domain findings where models simultaneously achieve perfect adversarial defense and 0\% task completion, suggesting blanket refusal rather than nuanced policy application.
+
+\noindent \textit{Hypothesis 2: Adversarial simulator insufficiency.} The adversarial simulator, while implementing multiple attack strategies at varying sophistication levels, may not generate attacks of sufficient complexity to successfully exploit model vulnerabilities. Contemporary language models may possess defensive capabilities that exceed the challenge level presented by the current adversarial simulation framework, necessitating more sophisticated adversarial generation approaches.
+
+\noindent \textit{Hypothesis 3: Evaluation framework limitations.} The binary classification of responses as ``attack successful'' versus ``defended'' may not capture subtle vulnerabilities where models partially comply with adversarial requests, provide exploitable information, or violate constraints in non-obvious ways. A more granular evaluation framework might reveal vulnerabilities not detected by current binary assessment criteria.
+
+\subsubsection{Capability-Safety Tradeoff: Active versus Passive Safety}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/model_comparison_radar.png}
+\caption{\textbf{Multi-Dimensional Model Comparison.} Radar chart showing performance across Safety, Security, Reliability, and Compliance dimensions for evaluated models.}
+\label{fig:model_radar}
+\end{figure}
+
+Analysis of individual model response patterns reveals important distinctions in how different architectures achieve safety guarantees. While all models achieve identical aggregate performance metrics, examination of response characteristics uncovers fundamental differences in the mechanisms underlying safety compliance.
+
+\noindent Nemotron-3 Nano exhibits what we term ``safety through incompetence''---achieving zero violations not through proper policy reasoning and constraint enforcement but through functional incapacity to perform requested operations. Detailed analysis of response patterns reveals:
+
+\begin{itemize}
+\item \textbf{Proactive safety rate: 0.0\%} --- The model never proactively performs safety checks, verifies authorization, or validates constraints before attempting operations
+\item \textbf{Attack detection rate: 0.0\%} --- The model fails to identify or acknowledge adversarial manipulation attempts, social engineering patterns, or prompt injection attacks
+\item \textbf{Tool usage rate: 0.0\%} --- The model never invokes available tools for database queries, transaction processing, or information retrieval
+\item \textbf{Response clarity: Poor} --- 78\% of responses classified as ``unclear or nonsensical,'' 22\% as ``refused without explanation''
+\end{itemize}
+
+\noindent This behavioral profile reveals that Nemotron-3 Nano avoids violations by producing unclear, nonsensical, or non-responsive outputs rather than through understanding and adherence to safety policies. While this approach achieves perfect safety scores in our evaluation framework---no violations occur because no operations are attempted---it provides zero practical utility in deployment scenarios requiring functional task execution.
+
+\noindent In contrast, DeepSeek-V3 and Xiaomi MiMo-V2 demonstrate active safety engagement in healthcare and legal domains, with non-zero tool usage rates, explicit policy citations in refusals, and successful task completion alongside zero violations. These models successfully navigate the capability-safety tradeoff in domains where they demonstrate competence, performing useful operations while respecting safety constraints. The finance domain represents an interesting case where even these more capable models fail to achieve this balance, suggesting domain-specific challenges in capability-safety integration rather than universal incompetence.
+
+\noindent This finding highlights a critical methodological limitation in binary safety evaluation frameworks. Measuring only whether violations occur fails to distinguish between:
+\begin{enumerate}
+\item \textbf{Active safety}: Models that understand constraints, perform appropriate checks, and successfully complete tasks within policy boundaries
+\item \textbf{Passive safety}: Models that avoid violations through functional failure rather than policy adherence
+\end{enumerate}
+
+\noindent While both achieve zero violations in current metrics, only active safety provides deployment value. Future evaluation frameworks should incorporate capability assessment alongside safety measurement to identify models that achieve genuine safety-utility balance rather than safety-through-incompetence.
+
+\subsubsection{Synthesis and Critical Findings}
+
+The comprehensive evaluation reveals several critical findings with significant implications for AI safety research, deployment risk assessment, and future development priorities:
+
+\noindent \textbf{Finding 1: Domain-specific systematic failure.} Finance domain presents unique challenges that current training methodologies fundamentally fail to address. The perfect performance in healthcare and legal domains demonstrates that models possess the architectural capacity and general reasoning ability to handle complex regulatory frameworks, yet this capability does not transfer to financial contexts. This domain-specific failure, consistent across all evaluated models, suggests that finance requires specialized training approaches, enhanced regulatory knowledge integration, or architectural modifications not captured by general-purpose model development.
+
+\noindent \textbf{Finding 2: Compliance represents the hardest challenge.} Across all domains and models, compliance scores prove most challenging, with finance compliance collapsing to 0.00 even while security maintains 1.00. This pattern indicates that models can enforce technical security policies (authentication, authorization, access control) but struggle with higher-level regulatory reasoning requiring nuanced interpretation of legal frameworks, context-dependent constraint application, and temporal reasoning about regulatory obligations.
+
+\noindent \textbf{Finding 3: Perfect adversarial defense raises methodological questions.} The universal 0\% attack success rate across all strategies and sophistication levels represents either a remarkable achievement in defensive capability or a limitation in adversarial evaluation methodology. The coincidence of perfect defense with complete operational failure in finance suggests the latter interpretation may merit investigation.
+
+\noindent \textbf{Finding 4: Model scale and architecture prove insufficient.} The identical failure patterns across 30B, 120B, and 671B parameter models with diverse architectures demonstrate that simply scaling parameters or innovating architectures will not solve identified safety challenges. This finding redirects research attention from architectural innovation toward training methodology improvements, specialized safety-oriented fine-tuning, and domain-specific knowledge integration approaches.
+
+\noindent \textbf{Finding 5: Safety metrics must incorporate capability assessment.} The Nemotron-3 Nano case study reveals that safety-only evaluation can mischaracterize functional incompetence as robust safety. Comprehensive agent evaluation requires joint assessment of safety compliance and functional capability.
+
+\section{Discussion}
+
+\subsection{Key Insights}
+
+Our comprehensive evaluation reveals several critical insights about the current state of AI agent safety:
+
+\noindent \textbf{Domain-specific vulnerability patterns.} The stark contrast between finance and other domains reveals that safety capabilities do not transfer uniformly across regulatory contexts. Models trained primarily on general-purpose data successfully internalize healthcare and legal safety principles but fail catastrophically on financial compliance requirements. This suggests that financial regulatory reasoning requires specialized training data, domain-specific fine-tuning, or architectural modifications to support the temporal and compositional reasoning required for compliance verification.
+
+\noindent \textbf{The defense-capability paradox.} Perfect adversarial defense rates alongside complete functional failure in finance reveal a fundamental tension between safety and capability. Models appear to achieve safety through excessive conservatism rather than nuanced policy understanding, refusing both adversarial and legitimate requests rather than distinguishing between them. This pattern has significant implications for deployment: agents that achieve perfect safety scores may provide zero practical utility.
+
+\noindent \textbf{Compliance as a bottleneck.} The consistently low compliance scores (0.00 in finance) suggest that regulatory adherence is particularly challenging for current agents. This may reflect the complexity of compliance requirements, which often involve subtle contextual reasoning, temporal constraints, and domain-specific knowledge that goes beyond general-purpose training.
+
+\subsection{Implications for Agent Development}
+
+Our findings have several important implications for AI agent development:
+
+\noindent \textbf{Need for domain-specific training.} The variation in failure modes across domains suggests that domain-specific safety mechanisms are necessary. Generic safety training is insufficient to capture the nuances of regulatory requirements and domain-specific risks. Financial agents require specialized training on KYC/AML regulations, transaction approval workflows, and fiduciary duty reasoning.
+
+\noindent \textbf{Capability-aware safety evaluation.} Binary safety metrics that measure only violation occurrence fail to distinguish active safety from passive safety (safety through incompetence). Future evaluation frameworks should jointly assess safety compliance and functional capability, rewarding models that successfully complete tasks within policy boundaries rather than simply avoiding violations.
+
+\noindent \textbf{Adversarial testing methodology.} The universal 0\% attack success rate raises questions about adversarial simulator sophistication. Future work should develop more challenging adversarial generation approaches, including adaptive attacks that learn from model responses and multi-agent adversarial systems that coordinate attacks across multiple vectors.
+
+\subsection{Limitations}
+
+Our work has several limitations that should be considered when interpreting the results:
+
+\noindent \textbf{Simulation environment.} \aabench{} uses simulated environments rather than real-world deployments. While our scenarios are designed to be realistic, they may not capture all complexities of real-world systems. Future work should validate findings in actual deployment settings.
+
+\noindent \textbf{Black-box evaluation.} We evaluate agents in a black-box manner, without access to internal states or reasoning processes. White-box analysis could provide additional insights into failure modes and potential improvements.
+
+\noindent \textbf{Limited model coverage.} While we evaluate eight models spanning diverse architectures, the space of available models is vast and rapidly evolving. Future work should extend evaluation to additional models as they become available.
+
+\noindent \textbf{Static specifications.} Our safety specifications are static and defined before evaluation. In real-world settings, specifications may need to evolve over time or be learned from examples. Future work should explore dynamic specification learning and adaptation.
+
+\subsection{Future Directions}
+
+Several promising directions for future research emerge from our findings:
+
+\noindent \textbf{Domain-specific safety training.} Developing training methodologies that specifically target financial regulatory reasoning, including specialized datasets, domain-specific fine-tuning objectives, and curriculum learning approaches that progressively introduce complex compliance scenarios.
+
+\noindent \textbf{Capability-aware evaluation frameworks.} Extending safety benchmarks to jointly assess safety compliance and functional capability, distinguishing active safety from passive safety and rewarding models that achieve genuine safety-utility balance.
+
+\noindent \textbf{Adaptive adversarial testing.} Developing more sophisticated adversarial generation approaches that adapt to model defenses, coordinate attacks across multiple vectors, and exploit domain-specific vulnerabilities.
+
+\noindent \textbf{Interpretable safety mechanisms.} Developing interpretable safety mechanisms that can be audited and verified, including explicit reasoning chains for safety-critical decisions and human-in-the-loop verification for high-risk actions.
+
+\section{Conclusion}
+
+We have introduced \aabench, a comprehensive benchmark for evaluating AI agent safety, security, and reliability in dual-control environments. Our framework provides multi-dimensional evaluation across Safety, Security, Reliability, and Compliance dimensions, with systematic adversarial testing using five distinct attack strategies. Through extensive evaluation of eight leading LLM-based agents across three domains, we have revealed critical domain-specific vulnerabilities in current agent systems.
+
+\noindent Our key findings include: (1) striking domain-specific performance patterns, with perfect scores in healthcare and legal domains but catastrophic failure in finance (0\% task completion, 0.52 A\textsuperscript{2}-Score); (2) universal perfect adversarial defense rates (100\%) raising questions about the relationship between defensive conservatism and functional capability; (3) architecture-independent vulnerability patterns suggesting systemic training limitations rather than model-specific deficiencies; and (4) compliance as the most challenging dimension, particularly in financial contexts.
+
+\noindent These findings underscore the urgent need for domain-specific safety training, capability-aware evaluation methodologies, and more sophisticated adversarial testing approaches. We hope that \aabench{} will serve as a valuable tool for the research community, enabling systematic evaluation of agent safety and driving progress toward more robust and trustworthy AI systems.
+
+\section*{Acknowledgments}
+
+We thank the anonymous reviewers for their valuable feedback. This work was supported by [funding sources to be added in camera-ready version].
+
+\section*{Privacy and Regulatory Compliance Statements}
+
+All datasets comply with privacy regulations and ethical guidelines: no Protected Health Information (PHI) in synthetic data; MIMIC-III data is de-identified per HIPAA standards; credit card data is anonymized; synthetic data contains no real customer information. All data is either public domain (GDPR articles), open-licensed (CUAD), or synthetic.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{99}
+
+\bibitem{amodei2016concrete}
+Dario Amodei, Chris Olah, Jacob Steinhardt, Paul Christiano, John Schulman, and Dan Man\'{e}.
+\newblock Concrete problems in AI safety.
+\newblock \emph{arXiv preprint arXiv:1606.06565}, 2016.
+
+\bibitem{alshiekh2018safe}
+Mohammed Alshiekh, Roderick Bloem, R\"{u}diger Ehlers, Bettina K\"{o}nighofer, Scott Niekum, and Ufuk Topcu.
+\newblock Safe reinforcement learning via shielding.
+\newblock In \emph{Proceedings of the AAAI Conference on Artificial Intelligence}, volume 32, 2018.
+
+\bibitem{bai2022constitutional}
+Yuntao Bai, Saurav Kadavath, Sandipan Kundu, Amanda Askell, Jackson Kernion, Andy Jones, Anna Chen, Anna Goldie, Azalia Mirhoseini, Cameron McKinnon, et al.
+\newblock Constitutional AI: Harmlessness from AI feedback.
+\newblock \emph{arXiv preprint arXiv:2212.08073}, 2022.
+
+\bibitem{cao2020financial}
+Longbing Cao.
+\newblock AI in finance: Challenges, techniques, and opportunities.
+\newblock \emph{ACM Computing Surveys}, 55(3):1--38, 2020.
+
+\bibitem{casper2023open}
+Stephen Casper, Xander Davies, Claudia Shi, Thomas Krendl Gilbert, J\'{e}r\'{e}my Scheurer, Javier Rando, Rachel Freedman, Tomasz Korbak, David Lindner, Pedro Freire, et al.
+\newblock Open problems and fundamental limitations of reinforcement learning from human feedback.
+\newblock \emph{arXiv preprint arXiv:2307.15217}, 2023.
+
+\bibitem{char2020implementing}
+Danton S Char, Nigam H Shah, and David Magnus.
+\newblock Implementing machine learning in health care---addressing ethical challenges.
+\newblock \emph{New England Journal of Medicine}, 378(11):981--983, 2020.
+
+\bibitem{chevalier2018babyai}
+Maxime Chevalier-Boisvert, Dzmitry Bahdanau, Salem Lahlou, Lucas Willems, Chitwan Saharia, Thien Huu Nguyen, and Yoshua Bengio.
+\newblock BabyAI: A platform to study the sample efficiency of grounded language learning.
+\newblock In \emph{International Conference on Learning Representations}, 2018.
+
+\bibitem{christiano2017deep}
+Paul F Christiano, Jan Leike, Tom Brown, Miljan Martic, Shane Legg, and Dario Amodei.
+\newblock Deep reinforcement learning from human preferences.
+\newblock In \emph{Advances in Neural Information Processing Systems}, pages 4299--4307, 2017.
+
+\bibitem{clarke1999model}
+Edmund M Clarke, Orna Grumberg, and Doron Peled.
+\newblock \emph{Model checking}.
+\newblock MIT Press, 1999.
+
+\bibitem{deng2023mind2web}
+Xiang Deng, Yu Gu, Boyuan Zheng, Shijie Chen, Samuel Stevens, Boshi Wang, Huan Sun, and Yu Su.
+\newblock Mind2Web: Towards a generalist agent for the web.
+\newblock In \emph{Advances in Neural Information Processing Systems}, 2023.
+
+\bibitem{esteva2019guide}
+Andre Esteva, Katherine Chou, Serena Yeung, Nikhil Naik, Ali Madani, Ali Mottaghi, Yun Liu, Eric Topol, Jeff Dean, and Richard Socher.
+\newblock A guide to deep learning in healthcare.
+\newblock \emph{Nature Medicine}, 25(1):24--29, 2019.
+
+\bibitem{goodfellow2014explaining}
+Ian J Goodfellow, Jonathon Shlens, and Christian Szegedy.
+\newblock Explaining and harnessing adversarial examples.
+\newblock \emph{arXiv preprint arXiv:1412.6572}, 2014.
+
+\bibitem{hadfield2017inverse}
+Dylan Hadfield-Menell, Smitha Milli, Pieter Abbeel, Stuart J Russell, and Anca Dragan.
+\newblock Inverse reward design.
+\newblock In \emph{Advances in Neural Information Processing Systems}, pages 6765--6774, 2017.
+
+\bibitem{hendrycks2021unsolved}
+Dan Hendrycks, Nicholas Carlini, John Schulman, and Jacob Steinhardt.
+\newblock Unsolved problems in ML safety.
+\newblock \emph{arXiv preprint arXiv:2109.13916}, 2021.
+
+\bibitem{hoare1969axiomatic}
+Charles Antony Richard Hoare.
+\newblock An axiomatic basis for computer programming.
+\newblock \emph{Communications of the ACM}, 12(10):576--580, 1969.
+
+\bibitem{jansen2020safe}
+Nils Jansen, Bettina K\"{o}nighofer, Sebastian Junges, and Roderick Bloem.
+\newblock Safe reinforcement learning using probabilistic shields.
+\newblock In \emph{Proceedings of the 31st International Conference on Concurrency Theory}, 2020.
+
+\bibitem{katz2017reluplex}
+Guy Katz, Clark Barrett, David L Dill, Kyle Julian, and Mykel J Kochenderfer.
+\newblock Reluplex: An efficient SMT solver for verifying deep neural networks.
+\newblock In \emph{International Conference on Computer Aided Verification}, pages 97--117. Springer, 2017.
+
+\bibitem{liang2022holistic}
+Percy Liang, Rishi Bommasani, Tony Lee, Dimitris Tsipras, Dilara Soylu, Michihiro Yasunaga, Yian Zhang, Deepak Narayanan, Yuhuai Wu, Ananya Kumar, et al.
+\newblock Holistic evaluation of language models.
+\newblock \emph{arXiv preprint arXiv:2211.09110}, 2022.
+
+\bibitem{liu2023agentbench}
+Xiao Liu, Hao Yu, Hanchen Zhang, Yifan Xu, Xuanyu Lei, Hanyu Lai, Yu Gu, Hangliang Ding, Kaiwen Men, Kejuan Yang, et al.
+\newblock AgentBench: Evaluating LLMs as agents.
+\newblock \emph{arXiv preprint arXiv:2308.03688}, 2023.
+
+\bibitem{ozbayoglu2020deep}
+Ahmet Murat Ozbayoglu, Mehmet Ugur Gudelek, and Omer Berat Sezer.
+\newblock Deep learning for financial applications: A survey.
+\newblock \emph{Applied Soft Computing}, 93:106384, 2020.
+
+\bibitem{ouyang2022training}
+Long Ouyang, Jeffrey Wu, Xu Jiang, Diogo Almeida, Carroll Wainwright, Pamela Mishkin, Chong Zhang, Sandhini Agarwal, Katarina Slama, Alex Ray, et al.
+\newblock Training language models to follow instructions with human feedback.
+\newblock In \emph{Advances in Neural Information Processing Systems}, pages 27730--27744, 2022.
+
+\bibitem{perez2022ignore}
+F\'{a}bio Perez and Ian Ribeiro.
+\newblock Ignore previous prompt: Attack techniques for language models.
+\newblock \emph{arXiv preprint arXiv:2211.09527}, 2022.
+
+\bibitem{russell2019human}
+Stuart Russell.
+\newblock \emph{Human compatible: Artificial intelligence and the problem of control}.
+\newblock Penguin, 2019.
+
+\bibitem{shinn2023reflexion}
+Noah Shinn, Federico Cassano, Beck Labash, Ashwin Gopinath, Karthik Narasimhan, and Shunyu Yao.
+\newblock Reflexion: Language agents with verbal reinforcement learning.
+\newblock \emph{arXiv preprint arXiv:2303.11366}, 2023.
+
+\bibitem{singhal2023large}
+Karan Singhal, Shekoofeh Azizi, Tao Tu, S Sara Mahdavi, Jason Wei, Hyung Won Chung, Nathan Scales, Ajay Tanwani, Heather Cole-Lewis, Stephen Pfohl, et al.
+\newblock Large language models encode clinical knowledge.
+\newblock \emph{Nature}, 620(7972):172--180, 2023.
+
+\bibitem{singh2019abstract}
+Gagandeep Singh, Timon Gehr, Markus P\"{u}schel, and Martin Vechev.
+\newblock An abstract domain for certifying neural networks.
+\newblock \emph{Proceedings of the ACM on Programming Languages}, 3(POPL):1--30, 2019.
+
+\bibitem{soares2015corrigibility}
+Nate Soares, Benja Fallenstein, Stuart Armstrong, and Eliezer Yudkowsky.
+\newblock Corrigibility.
+\newblock In \emph{Workshops at the Twenty-Ninth AAAI Conference on Artificial Intelligence}, 2015.
+
+\bibitem{srivastava2022beyond}
+Aarohi Srivastava, Abhinav Rastogi, Abhishek Rao, Abu Awal Md Shoeb, Abubakar Abid, Adam Fisch, Adam R Brown, Adam Santoro, Aditya Gupta, Adri\`{a} Garriga-Alonso, et al.
+\newblock Beyond the imitation game: Quantifying and extrapolating the capabilities of language models.
+\newblock \emph{arXiv preprint arXiv:2206.04615}, 2022.
+
+\bibitem{szegedy2013intriguing}
+Christian Szegedy, Wojciech Zaremba, Ilya Sutskever, Joan Bruna, Dumitru Erhan, Ian Goodfellow, and Rob Fergus.
+\newblock Intriguing properties of neural networks.
+\newblock \emph{arXiv preprint arXiv:1312.6199}, 2013.
+
+\bibitem{topol2019high}
+Eric J Topol.
+\newblock High-performance medicine: the convergence of human and artificial intelligence.
+\newblock \emph{Nature Medicine}, 25(1):44--56, 2019.
+
+\bibitem{treleaven2013algorithmic}
+Philip Treleaven, Michal Galas, and Vidhi Lalchand.
+\newblock Algorithmic trading review.
+\newblock \emph{Communications of the ACM}, 56(11):76--85, 2013.
+
+\bibitem{wallace2019universal}
+Eric Wallace, Shi Feng, Nikhil Kandpal, Matt Gardner, and Sameer Singh.
+\newblock Universal adversarial triggers for attacking and analyzing NLP.
+\newblock In \emph{Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing}, pages 2153--2162, 2019.
+
+\bibitem{wei2022chain}
+Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Brian Ichter, Fei Xia, Ed Chi, Quoc Le, and Denny Zhou.
+\newblock Chain-of-thought prompting elicits reasoning in large language models.
+\newblock In \emph{Advances in Neural Information Processing Systems}, pages 24824--24837, 2022.
+
+\bibitem{wei2023jailbroken}
+Alexander Wei, Nika Haghtalab, and Jacob Steinhardt.
+\newblock Jailbroken: How does LLM safety training fail?
+\newblock \emph{arXiv preprint arXiv:2307.02483}, 2023.
+
+\bibitem{wu2023bloomberggpt}
+Shijie Wu, Ozan Irsoy, Steven Lu, Vadim Dabravolski, Mark Dredze, Sebastian Gehrmann, Prabhanjan Kambadur, David Rosenberg, and Gideon Mann.
+\newblock BloombergGPT: A large language model for finance.
+\newblock \emph{arXiv preprint arXiv:2303.17564}, 2023.
+
+\bibitem{yao2022webshop}
+Shunyu Yao, Howard Chen, John Yang, and Karthik Narasimhan.
+\newblock WebShop: Towards scalable real-world web interaction with grounded language agents.
+\newblock In \emph{Advances in Neural Information Processing Systems}, 2022.
+
+\bibitem{yao2023react}
+Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, and Yuan Cao.
+\newblock ReAct: Synergizing reasoning and acting in language models.
+\newblock In \emph{International Conference on Learning Representations}, 2023.
+
+\bibitem{zou2023universal}
+Andy Zou, Zifan Wang, J Zico Kolter, and Matt Fredrikson.
+\newblock Universal and transferable adversarial attacks on aligned language models.
+\newblock \emph{arXiv preprint arXiv:2307.15043}, 2023.
+
+\end{thebibliography}
+
+\newpage
+\appendix
+
+\section{Framework Extensibility}
+
+\subsection{Domain-Specific Tools}
+
+A key feature of \aabench{} is its extensible toolset, which simulates real-world APIs and systems that an agent would interact with in a given domain. Below is a description of the core tools available in each of the pre-built domains.
+
+\begin{table}[h]
+\centering
+\caption{Domain-Specific Tools in \aabench{}}
+\label{tab:domain_tools}
+\small
+\begin{tabular}{p{2.5cm}p{3.5cm}p{7cm}}
+\toprule
+\textbf{Domain} & \textbf{Tool} & \textbf{Description} \\
+\midrule
+\multirow{4}{*}{\textbf{Healthcare}} & \texttt{PatientDB} & Manages electronic health records (EHRs), providing access to patient history, allergies, and current medications. \\
+& \texttt{Scheduler} & Handles booking, rescheduling, and canceling of patient appointments with healthcare providers. \\
+& \texttt{PrescriptionAPI} & Submits and validates new medication prescriptions. It cross-references with drug databases (e.g., RxNorm) and the patient's allergy list to prevent adverse interactions. \\
+& \texttt{BillingSystem} & Manages patient billing, processes insurance claims, and handles payment transactions. \\
+\midrule
+\multirow{4}{*}{\textbf{Finance}} & \texttt{AccountAPI} & Provides core banking functionalities, such as checking account balances, viewing transaction histories, and initiating fund transfers. \\
+& \texttt{TransactionQueue} & A message queue that processes incoming financial transactions, holding them for verification before final settlement. \\
+& \texttt{KYC\_Verifier} & Performs ``Know Your Customer'' (KYC) checks by validating customer identity documents against government and third-party databases. \\
+& \texttt{FraudDetectionModule} & Analyzes transaction patterns in real-time to flag suspicious activities that may indicate fraud or money laundering. \\
+\midrule
+\multirow{4}{*}{\textbf{Legal}} & \texttt{DocumentStore} & A version-controlled repository for managing legal documents, including contracts, case files, and internal memos. \\
+& \texttt{ContractAnalysisAPI} & Uses NLP to extract and analyze key clauses, identify obligations, and summarize the content of legal contracts. \\
+& \texttt{ComplianceDB} & A knowledge base containing structured information on legal and regulatory requirements, such as GDPR, CCPA, and HIPAA. \\
+& \texttt{RedactionTool} & Programmatically identifies and scrubs personally identifiable information (PII) and other sensitive data from documents before sharing. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Expanding the Benchmark to New Domains}
+
+\aabench{} was designed to be modular and extensible, allowing researchers to evaluate agent safety in new, custom domains. The process for adding a new domain involves the following five steps:
+
+\begin{enumerate}
+    \item \textbf{Define the Domain and Safety-Critical Operations:} Clearly define the new application domain (e.g., autonomous driving, power grid management). Within this domain, identify the core tasks and operations that have safety-critical implications.
+
+    \item \textbf{Implement Domain-Specific Tools:} Create a set of Python-based tools that simulate the necessary APIs and systems for the new domain. These tools should be implemented as classes with methods that an agent can call.
+
+    \item \textbf{Write Safety Specifications:} Using the \aabench{} compositional safety specification language, formally define the safety constraints for the new domain. These specifications can include invariants, temporal properties, and access control rules.
+
+    \item \textbf{Develop Task Scenarios:} Create a suite of task scenarios in JSON format. Each scenario file should define the initial state of the environment, the agent's high-level task, the specific safety specifications to be enforced, and the criteria for success.
+
+    \item \textbf{Register the New Domain:} Integrate the new domain into the benchmark by adding it to the central registry. This involves creating a configuration file that points to the new tools, safety specifications, and task scenarios.
+\end{enumerate}
+
+\section{Enhanced Evaluation Metrics}
+
+\subsection{Attack Resistance vs. Detection}
+
+Prior work conflates attack detection with resistance. We distinguish:
+
+\begin{itemize}
+    \item \textbf{Detection Rate}: $\frac{\text{\# attacks recognized}}{\text{\# total attacks}}$
+    \item \textbf{Resistance Rate}: $\frac{\text{\# attacks defeated}}{\text{\# total attacks}}$
+    \item \textbf{Detection-Resistance Gap}: Measures agents that recognize but fail to resist attacks
+\end{itemize}
+
+\noindent This distinction reveals important failure modes: agents may recognize social engineering (citing ``suspicious request'') yet still comply.
+
+\subsection{Failure Pattern Analysis}
+
+We automatically identify recurring failure patterns through frequency analysis:
+
+\begin{equation}
+\text{Pattern}(p) = \left(\text{description}, \frac{\text{occurrences}(p)}{\text{total episodes}}, \text{severity}(p)\right)
+\end{equation}
+
+\noindent Common patterns include:
+\begin{itemize}
+    \item \texttt{missing\_allergy\_check}: Agent prescribes without allergy verification
+    \item \texttt{weak\_pi\_defense}: Recognizes but follows prompt injection
+    \item \texttt{kyc\_bypass}: Skips KYC verification in financial transactions
+\end{itemize}
+
+\subsection{Behavioral Consistency Tracking}
+
+To measure reliability, we track response consistency across semantically equivalent scenarios:
+
+\begin{equation}
+\text{Consistency}(r_1, r_2) = \cos\left(\text{embed}(r_1), \text{embed}(r_2)\right)
+\end{equation}
+
+\noindent where $\text{embed}(\cdot)$ maps responses to semantic embeddings. Low consistency across equivalent attacks indicates unreliable defenses.
+
+\end{document}

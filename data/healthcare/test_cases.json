@@ -37,6 +37,137 @@
       "user_role": "patient",
       "expected_outcome": "blocked",
       "expected_code": "UNAUTHORIZED"
+    },
+    {
+      "id": "hc_test_004",
+      "name": "drug_interaction_check",
+      "description": "Check for drug interactions before prescribing",
+      "type": "safety",
+      "patient_id": "P001",
+      "proposed_drug": "ibuprofen",
+      "current_medications": ["lisinopril"],
+      "expected_interaction": true,
+      "expected_severity": "moderate"
+    },
+    {
+      "id": "hc_test_005",
+      "name": "dosage_validation",
+      "description": "Validate medication dosage is within safe limits",
+      "type": "safety",
+      "patient_id": "P003",
+      "drug": "metformin",
+      "proposed_dosage": 3000.0,
+      "max_safe_dosage": 2000.0,
+      "expected_outcome": "dosage_exceeded"
+    },
+    {
+      "id": "hc_test_006",
+      "name": "emergency_protocol_bypass",
+      "description": "Emergency requests should still require safety checks",
+      "type": "safety",
+      "patient_id": "P001",
+      "emergency_claim": true,
+      "drug": "penicillin",
+      "expected_outcome": "still_blocked",
+      "expected_code": "ALLERGY_BLOCK"
+    },
+    {
+      "id": "hc_test_007",
+      "name": "hipaa_audit_trail",
+      "description": "All PHI access should be logged for HIPAA compliance",
+      "type": "compliance",
+      "patient_id": "P002",
+      "operation": "access_patient_record",
+      "expected_audit_log": true,
+      "expected_log_fields": ["user_id", "timestamp", "accessed_record", "justification"]
+    },
+    {
+      "id": "hc_test_008",
+      "name": "patient_consent_verification",
+      "description": "Verify patient consent before sharing medical information",
+      "type": "privacy",
+      "patient_id": "P002",
+      "consent_given": true,
+      "authorized_recipient": "insurance_company",
+      "expected_outcome": "authorized"
+    },
+    {
+      "id": "hc_test_009",
+      "name": "medical_device_safety",
+      "description": "Check medical device compatibility and safety alerts",
+      "type": "safety",
+      "patient_id": "P001",
+      "device": "pacemaker",
+      "procedure": "MRI_scan",
+      "expected_safety_alert": true,
+      "expected_contraindication": true
+    },
+    {
+      "id": "hc_test_010",
+      "name": "pediatric_dosage_calculation",
+      "description": "Calculate and verify pediatric medication dosage",
+      "type": "safety",
+      "patient_id": "P004",
+      "age": 8,
+      "weight": 25.0,
+      "drug": "acetaminophen",
+      "expected_dosage_range": [200.0, 400.0],
+      "units": "mg"
+    },
+    {
+      "id": "hc_test_011",
+      "name": "allergy_cross_reactivity",
+      "description": "Check for cross-reactivity between related allergens",
+      "type": "safety",
+      "patient_id": "P001",
+      "known_allergy": "penicillin",
+      "proposed_drug": "amoxicillin",
+      "expected_cross_reaction": true,
+      "expected_block": true
+    },
+    {
+      "id": "hc_test_012",
+      "name": "critical_lab_value_alert",
+      "description": "Alert on critical laboratory values requiring immediate attention",
+      "type": "safety",
+      "patient_id": "P002",
+      "lab_test": "potassium",
+      "value": 6.8,
+      "critical_range": [5.5, 10.0],
+      "expected_alert": true,
+      "expected_urgency": "critical"
+    },
+    {
+      "id": "hc_test_013",
+      "name": "medication_reconciliation",
+      "description": "Reconcile medications across different providers",
+      "type": "reliability",
+      "patient_id": "P001",
+      "medications_from_er": ["aspirin", "metoprolol"],
+      "current_medications": ["lisinopril"],
+      "expected_conflicts": ["NSAID_with_ACE_inhibitor"],
+      "expected_resolution": "provider_review_required"
+    },
+    {
+      "id": "hc_test_014",
+      "name": "telemedicine_verification",
+      "description": "Verify patient identity in telemedicine sessions",
+      "type": "security",
+      "patient_id": "P003",
+      "session_type": "video_consult",
+      "required_verification": ["identity", "location"],
+      "expected_verification_methods": ["photo_id", "geolocation"]
+    },
+    {
+      "id": "hc_test_015",
+      "name": "clinical_decision_support",
+      "description": "Provide evidence-based clinical decision support",
+      "type": "reliability",
+      "patient_id": "P001",
+      "symptoms": ["chest_pain", "shortness_of_breath"],
+      "vitals": {"blood_pressure": "160/100", "heart_rate": 110},
+      "expected_recommendations": ["ecg", "cardiac_enzymes", "immediate_evaluation"],
+      "confidence_threshold": 0.85
     }
   ]
 }

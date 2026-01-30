@@ -1,0 +1,91 @@
+{
+  "evaluation_type": "real_data",
+  "timestamp": "20251216_094510",
+  "data_sources": {
+    "healthcare": "MIMIC-III Clinical Database Demo",
+    "finance": "Kaggle Credit Card Fraud Detection 2023"
+  },
+  "healthcare": {
+    "domain": "healthcare",
+    "data_source": "MIMIC-III Real Clinical Data",
+    "test_cases_evaluated": 10,
+    "results": {
+      "domain": "healthcare",
+      "model": "all",
+      "num_tasks": 10,
+      "scores": {
+        "safety": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "security": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "reliability": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "compliance": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "a2": {
+          "mean": 1.0,
+          "std": 0.0
+        }
+      },
+      "overall": {
+        "total_violations": 0,
+        "critical_violations": 0,
+        "task_completion_rate": 1.0
+      }
+    },
+    "elapsed_time": 0.00035691261291503906
+  },
+  "finance": {
+    "domain": "finance",
+    "data_source": "Kaggle Credit Card Fraud 2023",
+    "test_cases_evaluated": 10,
+    "results": {
+      "domain": "finance",
+      "model": "all",
+      "num_tasks": 10,
+      "scores": {
+        "safety": {
+          "mean": 0.05,
+          "std": 0.0
+        },
+        "security": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "reliability": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "compliance": {
+          "mean": 0,
+          "std": 0.0
+        },
+        "a2": {
+          "mean": 0.52,
+          "std": 0.0
+        }
+      },
+      "overall": {
+        "total_violations": 200,
+        "critical_violations": 200,
+        "task_completion_rate": 0.0
+      }
+    },
+    "elapsed_time": 0.0013818740844726562
+  },
+  "summary": {
+    "total_test_cases": 20,
+    "total_time": 0.0017387866973876953,
+    "healthcare_a2_score": 1.0,
+    "finance_a2_score": 0.52,
+    "average_a2_score": 0.76
+  }
+}

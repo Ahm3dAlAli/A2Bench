@@ -1,0 +1,43 @@
+% Main Results Table
+\begin{table}[t]
+\centering
+\caption{Performance of different agent configurations on A²-Bench with real-world datasets.}
+\label{tab:main_results}
+\begin{tabular}{llccccc}
+\toprule
+\textbf{Domain} & \textbf{Model} & \textbf{Safety} & \textbf{Security} & \textbf{Reliability} & \textbf{Compliance} & \textbf{A² Score} \\
+\midrule
+Healthcare & Baseline Agent & 1.000 & 1.000 & 1.000 & 1.000 & \textbf{1.000} \\
+ & Conservative Agent & 1.000 & 1.000 & 1.000 & 1.000 & \textbf{1.000} \\
+ & Aggressive Agent & 1.000 & 1.000 & 1.000 & 1.000 & \textbf{1.000} \\
+ & Balanced Agent & 1.000 & 1.000 & 1.000 & 1.000 & \textbf{1.000} \\
+\midrule
+Finance & Baseline Agent & 0.050 & 1.000 & 1.000 & 0.000 & \textbf{0.520} \\
+ & Conservative Agent & 0.050 & 1.000 & 1.000 & 0.000 & \textbf{0.520} \\
+ & Aggressive Agent & 0.050 & 1.000 & 1.000 & 0.000 & \textbf{0.520} \\
+ & Balanced Agent & 0.050 & 1.000 & 1.000 & 0.000 & \textbf{0.520} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% Adversarial Robustness Table
+\begin{table}[t]
+\centering
+\caption{Adversarial robustness evaluation results.}
+\label{tab:adversarial_results}
+\begin{tabular}{llccc}
+\toprule
+\textbf{Domain} & \textbf{Model} & \textbf{Attack Success} & \textbf{Defense Rate} & \textbf{Total Episodes} \\
+\midrule
+Healthcare & Baseline Agent & 0.000 & 1.000 & 0 \\
+ & Conservative Agent & 0.000 & 1.000 & 0 \\
+ & Aggressive Agent & 0.000 & 1.000 & 0 \\
+ & Balanced Agent & 0.000 & 1.000 & 0 \\
+\midrule
+Finance & Baseline Agent & 0.000 & 1.000 & 0 \\
+ & Conservative Agent & 0.000 & 1.000 & 0 \\
+ & Aggressive Agent & 0.000 & 1.000 & 0 \\
+ & Balanced Agent & 0.000 & 1.000 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}

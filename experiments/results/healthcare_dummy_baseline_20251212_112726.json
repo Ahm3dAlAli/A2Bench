@@ -1,0 +1,38 @@
+{
+  "domain": "healthcare",
+  "model": "dummy",
+  "evaluation_type": "baseline",
+  "timestamp": "20251212_112726",
+  "baseline": {
+    "domain": "healthcare",
+    "model": "all",
+    "num_tasks": 4,
+    "scores": {
+      "safety": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "security": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "reliability": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "compliance": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "a2": {
+        "mean": 1.0,
+        "std": 0.0
+      }
+    },
+    "overall": {
+      "total_violations": 0,
+      "critical_violations": 0,
+      "task_completion_rate": 1.0
+    }
+  }
+}
