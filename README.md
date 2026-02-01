@@ -929,19 +929,6 @@ python experiments/run_comprehensive_multi_domain_evaluation.py \
     --verbose
 ```
 
-### Using Shell Scripts
-
-```bash
-# Free models (OpenRouter)
-bash scripts/run_1_free_models.sh
-
-# GPT-4o mini
-bash scripts/run_2_gpt5mini.sh
-
-# Gemini Flash
-bash scripts/run_4_gemini_flash.sh
-```
-
 ---
 
 ## CLI
@@ -971,7 +958,7 @@ Available commands:
 
 ## Docker
 
-A `Dockerfile` is included for reproducible containerized evaluation:
+### Full Benchmark (Standalone)
 
 ```bash
 # Build
@@ -980,10 +967,37 @@ docker build -t a2bench .
 # Run with API key
 docker run -e OPENROUTER_API_KEY="your-key" a2bench \
     --models gpt-4o --domains healthcare finance legal --num-seeds 3
-
-# Run in test mode (no API key needed)
-docker run a2bench --test-mode
 ```
+
+### Green Agent (AgentBeats / A2A)
+
+The green agent is the evaluator that scores a purple agent (agent under test) via the [A2A protocol](https://github.com/google/A2A). It can be built and run end-to-end without manual intervention:
+
+```bash
+# Build the green agent
+docker build -t a2bench-green -f agentbeats-leaderboard/green-agent/Dockerfile .
+
+# Run the green agent (listens on port 9009)
+docker run -p 9009:9009 \
+    -e PARTICIPANT_ENDPOINT="http://host.docker.internal:9010" \
+    a2bench-green
+
+# Restrict to a single domain
+docker run -p 9009:9009 \
+    -e PARTICIPANT_ENDPOINT="http://host.docker.internal:9010" \
+    -e A2BENCH_DOMAIN="healthcare" \
+    a2bench-green
+```
+
+Domain-specific Dockerfiles are also available:
+
+```bash
+docker build -t a2bench-green-healthcare -f agentbeats-leaderboard/green-agent-healthcare/Dockerfile .
+docker build -t a2bench-green-finance    -f agentbeats-leaderboard/green-agent-finance/Dockerfile .
+docker build -t a2bench-green-legal      -f agentbeats-leaderboard/green-agent-legal/Dockerfile .
+```
+
+The green agent exposes an A2A-compatible endpoint at `/` and an agent card at `/.well-known/agent-card.json`. Point `PARTICIPANT_ENDPOINT` to your purple agent's A2A server URL.
 
 ---
 
@@ -1005,43 +1019,25 @@ docker run a2bench --test-mode
 
 ```
 a2-bench/
-├── a2_bench/
-│   ├── __init__.py
+├── a2_bench/                    # Core benchmark package
 │   ├── benchmark.py             # Main benchmark orchestrator
 │   ├── cli.py                   # CLI entry point (a2-bench command)
-│   ├── core/
-│   │   ├── environment.py       # Stateful execution environment
-│   │   ├── evaluation.py        # A²-Score computation
-│   │   ├── safety_spec.py       # Safety property definitions
-│   │   ├── safety_monitor.py    # Runtime violation detection
-│   │   └── response_analyzer.py # Per-response classification
-│   ├── agents/
-│   │   ├── base.py              # BaseAgent interface + AgentResponse
-│   │   └── llm_agent.py         # Multi-provider LLM agent
-│   ├── domains/
-│   │   ├── healthcare/          # HIPAA domain (database, tools, tasks, safety_spec)
-│   │   ├── finance/             # AML/KYC domain
-│   │   └── legal/               # GDPR/CCPA domain
-│   ├── adversary/
-│   │   ├── simulator.py         # AdversarySimulator + AdversarialTestSuite
-│   │   └── strategies.py        # 5 attack strategy implementations
+│   ├── core/                    # Environment, evaluation, safety specs
+│   ├── agents/                  # BaseAgent + LLMAgent (OpenAI/Anthropic/OpenRouter)
+│   ├── domains/                 # Healthcare, Finance, Legal domains
+│   ├── adversary/               # AdversarySimulator + 5 attack strategies
 │   ├── reporting/               # Result formatting
 │   └── utils/                   # Logging, analysis utilities
-├── configs/
-│   ├── healthcare.yaml          # Healthcare evaluation config
-│   ├── finance.yaml             # Finance evaluation config
-│   └── legal.yaml               # Legal evaluation config
-├── experiments/
-│   ├── run_comprehensive_multi_domain_evaluation.py  # Main experiment runner
-│   ├── generate_figures.py      # Publication-quality plots
-│   ├── generate_tables.py       # Result tables
-│   └── results/                 # JSON result files
-├── scripts/                     # Shell scripts for batch runs
+├── agentbeats-leaderboard/      # A2A green/purple agents + scenario configs
+│   ├── green-agent/             # Green agent Dockerfile + A2A server
+│   ├── purple-agent/            # Purple agent Dockerfile + A2A server
+│   └── scenario*.toml           # AgentBeats scenario definitions
+├── configs/                     # Domain evaluation YAML configs
+├── data/                        # Test cases and downloaded datasets
+├── experiments/                 # Experiment runners + figure/table generators
+├── scripts/                     # Dataset download utilities
 ├── tests/                       # Test suite
-├── data/                        # Test data and datasets
-├── paper/                       # Research paper and figures
-├── Dockerfile                   # Container build for reproducible runs
-├── .dockerignore
+├── Dockerfile                   # Standalone benchmark container
 ├── setup.py
 ├── requirements.txt
 └── README.md

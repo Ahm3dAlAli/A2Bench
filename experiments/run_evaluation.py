@@ -276,7 +276,7 @@ def main():
         "--models",
         nargs="+",
         default=["dummy"],
-        help="Models to evaluate (dummy, gpt4, claude, o4mini, llama-3.1-8b, mistral-7b, phi-3-mini, gemma-2-9b)",
+        help="Models to evaluate (dummy, gpt-5-mini, claude-4.5-haiku, llama-3.3-70b, gemini-3-flash, deepseek-v3.1, xiaomi-mimo-v2-flash, devstral-2-2512, nemotron-3-nano-30b)",
     )
     parser.add_argument(
         "--baseline-only", action="store_true", help="Run only baseline evaluation"
@@ -303,49 +303,47 @@ def main():
             "provider": "dummy",
             "model_id": "dummy",
         },
-        "gpt4": {
-            "provider": "openai",
-            "model_id": "gpt-4-0125-preview",
+        # --- Frontier / proprietary models ---
+        "gpt-5-mini": {
+            "provider": "openrouter",
+            "model_id": "openai/gpt-5-mini",
             "temperature": 0.0,
         },
-        "claude": {
-            "provider": "anthropic",
-            "model_id": "claude-3-sonnet-20240229",
+        "claude-4.5-haiku": {
+            "provider": "openrouter",
+            "model_id": "anthropic/claude-haiku-4-5-20250601",
             "temperature": 0.0,
         },
-        "o4mini": {
-            "provider": "openai",
-            "model_id": "o4-mini-2024-04-15",
+        "llama-3.3-70b": {
+            "provider": "openrouter",
+            "model_id": "meta-llama/llama-3.3-70b-instruct",
             "temperature": 0.0,
         },
-        # Open-source models
-        "llama-3.1-8b": {
-            "provider": "huggingface",
-            "model_id": "meta-llama/Llama-3.1-8B-Instruct",
+        "gemini-3-flash": {
+            "provider": "openrouter",
+            "model_id": "google/gemini-3-flash",
             "temperature": 0.0,
-            "quantization": "4bit",
-            "memory_required": 8,  # GB when quantized
         },
-        "mistral-7b": {
-            "provider": "huggingface",
-            "model_id": "mistralai/Mistral-7B-Instruct-v0.2",
+        # --- Open-source models ---
+        "deepseek-v3.1": {
+            "provider": "openrouter",
+            "model_id": "deepseek/deepseek-v3.1",
             "temperature": 0.0,
-            "quantization": "4bit",
-            "memory_required": 7,
         },
-        "phi-3-mini": {
-            "provider": "huggingface",
-            "model_id": "microsoft/Phi-3-mini-4k-instruct",
+        "xiaomi-mimo-v2-flash": {
+            "provider": "openrouter",
+            "model_id": "xiaomi/mimo-v2-flash",
             "temperature": 0.0,
-            "quantization": "4bit",
-            "memory_required": 4,
         },
-        "gemma-2-9b": {
-            "provider": "huggingface",
-            "model_id": "google/gemma-2-9b-it",
+        "devstral-2-2512": {
+            "provider": "openrouter",
+            "model_id": "mistralai/devstral-2-2512",
             "temperature": 0.0,
-            "quantization": "4bit",
-            "memory_required": 9,
+        },
+        "nemotron-3-nano-30b": {
+            "provider": "openrouter",
+            "model_id": "nvidia/nemotron-3-nano-30b",
+            "temperature": 0.0,
         },
     }
 

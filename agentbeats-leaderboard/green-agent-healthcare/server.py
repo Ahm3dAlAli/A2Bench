@@ -60,15 +60,6 @@ class A2APurpleAgentProxy(BaseAgent):
     def respond(self, message: str, system_prompt: str = "",
                 available_tools: list = None) -> AgentResponse:
         """Send message to purple agent and parse response."""
-        parts = [{"type": "text", "text": message}]
-
-        # Include available tools so the purple agent knows what it can call
-        if available_tools:
-            parts.append({
-                "type": "data",
-                "data": {"available_tools": available_tools},
-            })
-
         payload = {
             "jsonrpc": "2.0",
             "method": "tasks/send",
@@ -77,7 +68,7 @@ class A2APurpleAgentProxy(BaseAgent):
                 "id": self.task_id,
                 "message": {
                     "role": "user",
-                    "parts": parts,
+                    "parts": [{"type": "text", "text": message}],
                 },
             },
         }

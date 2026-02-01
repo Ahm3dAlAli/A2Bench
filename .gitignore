@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 *.so
 .Python
+*.egg-info/
 
 # Virtual environments
 venv/
@@ -35,15 +36,18 @@ Thumbs.db
 # Data downloads
 data/downloads/
 
-# Generated results and figures
-experiments/experiments/results/comprehensive/summary_table_*.tex
-experiments/experiments/results/comprehensive/figures/
+# Results (all experiment/evaluation results)
+experiments/results/
+experiments/experiments/
 experiments/figures/
-experiments/VISUALIZATION_README.md
-experiments/generate_visualizations.py
+experiments/logs/
+experiments/*.log
+agentbeats-leaderboard/results/
+agentbeats-leaderboard/submissions/
 
 # LaTeX output
 latex/
 
-# Run scripts
-scripts/run_*.sh
+# Cache
+.pytest_cache/
+.ruff_cache/
