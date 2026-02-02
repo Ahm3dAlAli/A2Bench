@@ -182,7 +182,7 @@ The `SafetyMonitor` tracks runtime violations in real-time:
 - **Reliability failures**: Incomplete tasks, incorrect tool usage
 - **Compliance violations**: Regulatory rule breaches
 
-### 2. Criteria-Based Scoring (τ²-bench format)
+### 2. Criteria-Based Scoring 
 
 Each task defines explicit evaluation criteria:
 
@@ -1062,9 +1062,9 @@ MIT License
 ## Citation
 
 ```bibtex
-@inproceedings{a2bench2025,
+@inproceedings{a2bench2026,
   title={A\textsuperscript{2}-Bench: Evaluating Autonomous Agent Safety in High-Stakes Domains},
-  author={Ahmed Abdulaal},
+  author={Ahmed Al Ali},
   booktitle={NeurIPS},
   year={2025}
 }
